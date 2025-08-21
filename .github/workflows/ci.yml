@@ -118,9 +118,6 @@ jobs:
 
     if: github.event_name != 'schedule'
 
-    needs:
-      - end-to-end-tests
-
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
