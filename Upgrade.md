@@ -2,6 +2,18 @@
 
 This document explains how you upgrade from one version to another. 
 
+## Upgrade from 1.0 to 2.0
+
+### Changes
+
+* The package is renamed to `elninotech/linkedin-api-client`.
+* Remove `happyr/linkedin-api-client` and require `elninotech/linkedin-api-client` in your composer.json
+* Change all imports from `Happyr\Linkedin` to `Elnino\Linkedin`
+* Request format is fixed to json, to match with v2 of the Linkedin API
+* Removed `simple_xml` as response format
+* Compatibility with httplug v2
+* Compatibility with php 8
+
 ## Upgrade from 0.7.2 to 1.0
 
 ### Changes
