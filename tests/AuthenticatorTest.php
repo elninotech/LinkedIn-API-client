@@ -1,22 +1,31 @@
 <?php
 
-namespace Elnino\LinkedIn;
+namespace Elnino\LinkedIn\Tests;
 
-use GuzzleHttp\Psr7\Response;
+use Elnino\LinkedIn\Authenticator;
 use Elnino\LinkedIn\Exception\LinkedInException;
-use Mockery as m;
+use Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface;
+use Elnino\LinkedIn\Http\RequestManager;
+use Elnino\LinkedIn\Http\UrlGenerator;
+use Elnino\LinkedIn\Storage\DataStorageInterface;
+use Elnino\LinkedIn\Storage\SessionStorage;
+use GuzzleHttp\Psr7\Response;
+use Mockery;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-class AuthenticatorTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(Authenticator::class)]
+class AuthenticatorTest extends MockeryTestCase
 {
     const APP_ID = '123456789';
     const APP_SECRET = '987654321';
 
     private function getRequestManagerMock()
     {
-        return m::mock('Elnino\LinkedIn\Http\RequestManager');
+        return Mockery::mock(RequestManager::class);
     }
 
     public function testGetLoginUrl()
@@ -30,14 +39,16 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
             'state' => $state,
         ];
 
-        $storage = $this->getMock('Elnino\LinkedIn\Storage\DataStorageInterface');
-        $storage->method('get')->with('state')->willReturn($state);
+        $storage = Mockery::mock(DataStorageInterface::Class);
+        $storage->shouldReceive('get')->with('state')->andReturn($state);
+        $storage->shouldReceive('set')->twice();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['establishCSRFTokenState', 'getStorage'], [$this->getRequestManagerMock(), self::APP_ID, self::APP_SECRET]);
-        $auth->expects($this->exactly(2))->method('establishCSRFTokenState')->willReturn(null);
-        $auth->method('getStorage')->will($this->returnValue($storage));
+        $auth = Mockery::mock(Authenticator::class, [$this->getRequestManagerMock(), self::APP_ID, self::APP_SECRET])->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('establishCSRFTokenState')->twice()->andReturn(null);
+        $auth->shouldReceive('getStorage')->andReturn($storage);
 
-        $generator = m::mock('Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface')
+        $generator = Mockery::mock(LinkedInUrlGeneratorInterface::class)
             ->shouldReceive('getUrl')->once()->with('www', 'oauth/v2/authorization', $params)->andReturn($expected)
             ->getMock();
 
@@ -56,7 +67,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
             'scope' => 'foo bar baz',
         ];
 
-        $generator = m::mock('Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface')
+        $generator = Mockery::mock(LinkedInUrlGeneratorInterface::class)
             ->shouldReceive('getUrl')->once()->with('www', 'oauth/v2/authorization', $params)->andReturn($expected)
             ->getMock();
 
@@ -65,104 +76,99 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     public function testFetchNewAccessToken()
     {
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator');
+        $generator = Mockery::mock(UrlGenerator::Class);
         $code = 'newCode';
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::Class)
             ->shouldReceive('set')->once()->with('code', $code)
             ->shouldReceive('set')->once()->with('access_token', 'at')
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getCode', 'getStorage', 'getAccessTokenFromCode'], [], '', false);
-        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $auth->expects($this->once())->method('getAccessTokenFromCode')->with($generator, $code)->will($this->returnValue('at'));
-        $auth->expects($this->once())->method('getCode')->will($this->returnValue($code));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->andReturn($storage);
+        $auth->shouldReceive('getAccessTokenFromCode')->once()->with($generator, $code)->andReturn('at');
+        $auth->shouldReceive('getCode')->once()->andReturn($code);
 
         $this->assertEquals('at', $auth->fetchNewAccessToken($generator));
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testFetchNewAccessTokenFail()
     {
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $generator = Mockery::mock(UrlGenerator::class);
         $code = 'newCode';
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::class)
             ->shouldReceive('clearAll')->once()
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getCode', 'getStorage', 'getAccessTokenFromCode'], [], '', false);
-        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $auth->expects($this->once())->method('getAccessTokenFromCode')->with($generator, $code)->willThrowException(new LinkedInException());
-        $auth->expects($this->once())->method('getCode')->will($this->returnValue($code));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->andReturn($storage);
+        $auth->shouldReceive('getAccessTokenFromCode')->once()->with($generator, $code)->andThrowExceptions([new LinkedInException()]);
+        $auth->shouldReceive('getCode')->once()->andReturn($code);
 
         $auth->fetchNewAccessToken($generator);
     }
 
     public function testFetchNewAccessTokenNoCode()
     {
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator');
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $generator = Mockery::mock(UrlGenerator::Class);
+        $storage = Mockery::mock(DataStorageInterface::Class)
             ->shouldReceive('get')->with('code')->andReturn('foobar')
             ->shouldReceive('get')->once()->with('access_token')->andReturn('baz')
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getCode', 'getStorage'], [], '', false);
-        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $auth->expects($this->once())->method('getCode');
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->andReturn($storage);
+        $auth->shouldReceive('getCode')->once();
 
         $this->assertEquals('baz', $auth->fetchNewAccessToken($generator));
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testGetAccessTokenFromCodeEmptyString()
     {
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $generator = Mockery::mock(UrlGenerator::Class);
 
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getAccessTokenFromCode');
         $method->setAccessible(true);
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', [], [], '', false);
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
 
         $method->invoke($auth, $generator, '');
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testGetAccessTokenFromCodeNull()
     {
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $generator = Mockery::mock(UrlGenerator::Class);
 
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getAccessTokenFromCode');
         $method->setAccessible(true);
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', [], [], '', false);
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
 
         $method->invoke($auth, $generator, null);
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testGetAccessTokenFromCodeFalse()
     {
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $generator = Mockery::mock(UrlGenerator::Class);
 
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getAccessTokenFromCode');
         $method->setAccessible(true);
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', [], [], '', false);
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
 
         $method->invoke($auth, $generator, false);
     }
 
     public function testGetAccessTokenFromCode()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getAccessTokenFromCode');
         $method->setAccessible(true);
 
         $code = 'code';
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator')
+        $generator = Mockery::mock(UrlGenerator::Class)
             ->shouldReceive('getUrl')->with(
                 'www',
                 'oauth/v2/accessToken'
@@ -175,16 +181,14 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foobar', $token, 'Standard get access token form code');
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testGetAccessTokenFromCodeNoTokenInResponse()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $method = new \ReflectionMethod(Authenticator::class, 'getAccessTokenFromCode');
         $method->setAccessible(true);
 
         $code = 'code';
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator')
+        $generator = Mockery::mock(UrlGenerator::Class)
             ->shouldReceive('getUrl')->with(
                 'www',
                 'oauth/v2/accessToken'
@@ -196,16 +200,14 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($method->invoke($auth, $generator, $code), 'Found array but no access token');
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testGetAccessTokenFromCodeEmptyResponse()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $method = new \ReflectionMethod(Authenticator::class, 'getAccessTokenFromCode');
         $method->setAccessible(true);
 
         $code = 'code';
-        $generator = m::mock('Elnino\LinkedIn\Http\UrlGenerator')
+        $generator = Mockery::mock(UrlGenerator::Class)
             ->shouldReceive('getUrl')->with(
                 'www',
                 'oauth/v2/accessToken'
@@ -229,11 +231,11 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $response = new Response(200, [], json_encode($responseData));
         $currentUrl = 'foobar';
 
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::Class)
             ->shouldReceive('get')->with('redirect_uri')->andReturn($currentUrl)
             ->getMock();
 
-        $requestManager = m::mock('Elnino\LinkedIn\Http\RequestManager')
+        $requestManager = Mockery::mock(RequestManager::class)
             ->shouldReceive('sendRequest')->once()->with('POST', 'url', [
                 'Content-Type' => 'application/x-www-form-urlencoded',
             ], http_build_query([
@@ -245,26 +247,28 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
             ]))->andReturn($response)
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getStorage'], [$requestManager, self::APP_ID, self::APP_SECRET]);
-        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $auth = Mockery::mock(Authenticator::class, [$requestManager, self::APP_ID, self::APP_SECRET])->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->andReturn($storage);
 
         return $auth;
     }
 
     public function testEstablishCSRFTokenState()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'establishCSRFTokenState');
+        $method = new \ReflectionMethod(Authenticator::class, 'establishCSRFTokenState');
         $method->setAccessible(true);
 
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::Class)
             ->shouldReceive('get')->with('state')->andReturn(null, 'state')
             ->shouldReceive('set')->once()->with('state', \Mockery::on(function (&$param) {
                 return !empty($param);
             }))
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getStorage'], [], '', false);
-        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->andReturn($storage);
 
         // Make sure we only set the state once
         $method->invoke($auth);
@@ -276,27 +280,28 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         unset($_REQUEST['code']);
         unset($_GET['code']);
 
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getCode');
         $method->setAccessible(true);
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', [], [], '', false);
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
 
         $this->assertNull($method->invoke($auth));
     }
 
     public function testGetCode()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getCode');
         $method->setAccessible(true);
         $state = 'bazbar';
 
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::class)
             ->shouldReceive('clear')->once()->with('state')
             ->shouldReceive('get')->once()->with('code')->andReturn(null)
             ->shouldReceive('get')->once()->with('state')->andReturn($state)
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getStorage'], [], '', false);
-        $auth->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->once()->andReturn($storage);
 
         $_REQUEST['code'] = 'foobar';
         $_REQUEST['state'] = $state;
@@ -304,21 +309,20 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foobar', $method->invoke($auth));
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInException
-     */
     public function testGetCodeInvalidCode()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getCode');
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInException::class);
+        $method = new \ReflectionMethod(Authenticator::class, 'getCode');
         $method->setAccessible(true);
 
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::Class)
             ->shouldReceive('get')->once()->with('code')->andReturn(null)
             ->shouldReceive('get')->once()->with('state')->andReturn('bazbar')
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getStorage'], [], '', false);
-        $auth->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->once()->andReturn($storage);
 
         $_REQUEST['code'] = 'foobar';
         $_REQUEST['state'] = 'invalid';
@@ -328,15 +332,16 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCodeUsedCode()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getCode');
+        $method = new \ReflectionMethod(Authenticator::class, 'getCode');
         $method->setAccessible(true);
 
-        $storage = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface')
+        $storage = Mockery::mock(DataStorageInterface::Class)
             ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->getMock();
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getStorage'], [], '', false);
-        $auth->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldAllowMockingProtectedMethods();
+        $auth->shouldReceive('getStorage')->once()->andReturn($storage);
 
         $_REQUEST['code'] = 'foobar';
 
@@ -345,15 +350,15 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     public function testStorageAccessors()
     {
-        $method = new \ReflectionMethod('Elnino\LinkedIn\Authenticator', 'getStorage');
+        $method = new \ReflectionMethod(Authenticator::class, 'getStorage');
         $method->setAccessible(true);
         $requestManager = $this->getRequestManagerMock();
         $auth = new Authenticator($requestManager, self::APP_ID, self::APP_SECRET);
 
         // test default
-        $this->assertInstanceOf('Elnino\LinkedIn\Storage\SessionStorage', $method->invoke($auth));
+        $this->assertInstanceOf(SessionStorage::class, $method->invoke($auth));
 
-        $object = m::mock('Elnino\LinkedIn\Storage\DataStorageInterface');
+        $object = Mockery::mock(DataStorageInterface::Class);
         $auth->setStorage($object);
         $this->assertEquals($object, $method->invoke($auth));
     }

@@ -54,7 +54,7 @@ class UrlGenerator implements UrlGeneratorInterface
             }
 
             // it needs to be PHP_QUERY_RFC3986. We want to have %20 between scopes
-            $url .= http_build_query($params, null, '&', PHP_QUERY_RFC3986);
+            $url .= http_build_query($params, '', '&', PHP_QUERY_RFC3986);
         }
 
         return $url;
@@ -114,7 +114,7 @@ class UrlGenerator implements UrlGeneratorInterface
 
         //assert: params is an array. It might be empty
         if (!empty($params)) {
-            return '?'.implode($params, '&');
+            return '?'.implode('&', $params);
         }
 
         return '';

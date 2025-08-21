@@ -1,13 +1,21 @@
 <?php
 
-namespace Elnino\LinkedIn;
+namespace Elnino\LinkedIn\Tests;
 
+use Elnino\LinkedIn\Authenticator;
+use Elnino\LinkedIn\Http\RequestManager;
+use Elnino\LinkedIn\Http\UrlGenerator;
+use Elnino\LinkedIn\LinkedIn;
 use GuzzleHttp\Psr7\Response;
+use Mockery;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-class LinkedInTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(LinkedIn::class)]
+class LinkedInTest extends MockeryTestCase
 {
     const APP_ID = '123456789';
     const APP_SECRET = '987654321';
@@ -23,31 +31,31 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $response = new Response(200, [], json_encode($expected));
         $url = 'http://example.com/test';
 
-        $headers = ['Authorization' => 'Bearer '.$token, 'Content-Type' => 'application/json', 'x-li-format' => 'json'];
+        $headers = ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json', 'x-li-format' => 'json'];
 
-        $generator = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator', ['getUrl']);
-        $generator->expects($this->once())->method('getUrl')->with(
+        $generator = Mockery::mock(UrlGenerator::Class);
+        $generator->shouldReceive('getUrl')->once()->with(
             $this->equalTo('api'),
             $this->equalTo($resource),
             $this->equalTo([
                 'url' => 'foo',
                 'format' => 'json',
             ]))
-            ->willReturn($url);
+            ->andReturn($url);
 
-        $requestManager = $this->getMock('Elnino\LinkedIn\Http\RequestManager', ['sendRequest']);
-        $requestManager->expects($this->once())->method('sendRequest')->with(
-                $this->equalTo($method),
-                $this->equalTo($url),
-                $this->equalTo($headers),
-                $this->equalTo(json_encode($postParams)))
-            ->willReturn($response);
+        $requestManager = Mockery::mock(RequestManager::class);
+        $requestManager->shouldReceive('sendRequest')->once()->with(
+            $this->equalTo($method),
+            $this->equalTo($url),
+            $this->equalTo($headers),
+            $this->equalTo(json_encode($postParams)))
+            ->andReturn($response);
 
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['getAccessToken', 'getUrlGenerator', 'getRequestManager'], [self::APP_ID, self::APP_SECRET]);
-
-        $linkedIn->expects($this->once())->method('getAccessToken')->willReturn($token);
-        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
-        $linkedIn->expects($this->once())->method('getRequestManager')->willReturn($requestManager);
+        $linkedIn = Mockery::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET])->makePartial();
+        $linkedIn->shouldAllowMockingProtectedMethods();
+        $linkedIn->shouldReceive('getAccessToken')->once()->andReturn($token);
+        $linkedIn->shouldReceive('getUrlGenerator')->once()->andReturn($generator);
+        $linkedIn->shouldReceive('getRequestManager')->once()->andReturn($requestManager);
 
         $result = $linkedIn->api($method, $resource, ['query' => $urlParams, 'json' => $postParams]);
         $this->assertEquals($expected, $result);
@@ -55,18 +63,18 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testIsAuthenticated()
     {
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['getAccessToken'], [self::APP_ID, self::APP_SECRET]);
-        $linkedIn->expects($this->once())->method('getAccessToken')->willReturn(null);
+        $linkedIn = Mockery::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET])->makePartial();
+        $linkedIn->shouldReceive('getAccessToken')->once()->andReturn(null);
         $this->assertFalse($linkedIn->isAuthenticated());
 
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['api', 'getAccessToken'], [self::APP_ID, self::APP_SECRET]);
-        $linkedIn->expects($this->once())->method('getAccessToken')->willReturn('token');
-        $linkedIn->expects($this->once())->method('api')->willReturn(['id' => 4711]);
+        $linkedIn = Mockery::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET])->makePartial();
+        $linkedIn->shouldReceive('getAccessToken')->once()->andReturn('token');
+        $linkedIn->shouldReceive('api')->once()->andReturn(['id' => 4711]);
         $this->assertTrue($linkedIn->isAuthenticated());
 
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['api', 'getAccessToken'], [self::APP_ID, self::APP_SECRET]);
-        $linkedIn->expects($this->once())->method('getAccessToken')->willReturn('token');
-        $linkedIn->expects($this->once())->method('api')->willReturn(['foobar' => 4711]);
+        $linkedIn = Mockery::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET])->makePartial();
+        $linkedIn->shouldReceive('getAccessToken')->once()->andReturn('token');
+        $linkedIn->shouldReceive('api')->once()->andReturn(['foobar' => 4711]);
         $this->assertFalse($linkedIn->isAuthenticated());
     }
 
@@ -77,11 +85,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     {
         $token = 'token';
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['fetchNewAccessToken'], [], '', false);
-        $auth->expects($this->once())->method('fetchNewAccessToken')->will($this->returnValue($token));
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldReceive('fetchNewAccessToken')->once()->andReturn($token);
 
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['getAuthenticator'], [], '', false);
-        $linkedIn->expects($this->once())->method('getAuthenticator')->willReturn($auth);
+        $linkedIn = Mockery::mock(LinkedIn::class)->makePartial();
+        $linkedIn->shouldAllowMockingProtectedMethods();
+        $linkedIn->shouldReceive('getAuthenticator')->once()->andReturn($auth);
 
         // Make sure we go to the authenticator only once
         $this->assertEquals($token, $linkedIn->getAccessToken());
@@ -90,14 +99,14 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testGeneratorAccessors()
     {
-        $get = new \ReflectionMethod('Elnino\LinkedIn\LinkedIn', 'getUrlGenerator');
+        $get = new \ReflectionMethod(LinkedIn::class, 'getUrlGenerator');
         $get->setAccessible(true);
         $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
 
         // test default
-        $this->assertInstanceOf('Elnino\LinkedIn\Http\UrlGenerator', $get->invoke($linkedIn));
+        $this->assertInstanceOf(UrlGenerator::Class, $get->invoke($linkedIn));
 
-        $object = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator');
+        $object = Mockery::mock(UrlGenerator::Class);
         $linkedIn->setUrlGenerator($object);
         $this->assertEquals($object, $get->invoke($linkedIn));
     }
@@ -144,7 +153,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testFormatAccessors()
     {
-        $get = new \ReflectionMethod('Elnino\LinkedIn\LinkedIn', 'getFormat');
+        $get = new \ReflectionMethod(LinkedIn::class, 'getFormat');
         $get->setAccessible(true);
         $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
 
@@ -161,17 +170,18 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $currentUrl = 'currentUrl';
         $loginUrl = 'result';
 
-        $generator = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator', ['getCurrentUrl']);
-        $generator->expects($this->once())->method('getCurrentUrl')->willReturn($currentUrl);
+        $generator = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $generator->shouldReceive('getCurrentUrl')->once()->andReturn($currentUrl);
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getLoginUrl'], [], '', false);
-        $auth->expects($this->once())->method('getLoginUrl')
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldReceive('getLoginUrl')->once()
             ->with($generator, ['redirect_uri' => $currentUrl])
-            ->will($this->returnValue($loginUrl));
+            ->andReturn($loginUrl);
 
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['getAuthenticator', 'getUrlGenerator'], [], '', false);
-        $linkedIn->expects($this->once())->method('getAuthenticator')->willReturn($auth);
-        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
+        $linkedIn = Mockery::mock(LinkedIn::class)->makePartial();
+        $linkedIn->shouldAllowMockingProtectedMethods();
+        $linkedIn->shouldReceive('getAuthenticator')->once()->andReturn($auth);
+        $linkedIn->shouldReceive('getUrlGenerator')->once()->andReturn($generator);
 
         $linkedIn->getLoginUrl();
     }
@@ -181,16 +191,17 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $loginUrl = 'result';
         $otherUrl = 'otherUrl';
 
-        $generator = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator');
+        $generator = Mockery::mock(UrlGenerator::Class);
 
-        $auth = $this->getMock('Elnino\LinkedIn\Authenticator', ['getLoginUrl'], [], '', false);
-        $auth->expects($this->once())->method('getLoginUrl')
+        $auth = Mockery::mock(Authenticator::class)->makePartial();
+        $auth->shouldReceive('getLoginUrl')->once()
             ->with($generator, ['redirect_uri' => $otherUrl])
-            ->will($this->returnValue($loginUrl));
+            ->andReturn($loginUrl);
 
-        $linkedIn = $this->getMock('Elnino\LinkedIn\LinkedIn', ['getAuthenticator', 'getUrlGenerator'], [], '', false);
-        $linkedIn->expects($this->once())->method('getAuthenticator')->willReturn($auth);
-        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
+        $linkedIn = Mockery::mock(LinkedIn::class)->makePartial();
+        $linkedIn->shouldAllowMockingProtectedMethods();
+        $linkedIn->shouldReceive('getAuthenticator')->once()->andReturn($auth);
+        $linkedIn->shouldReceive('getUrlGenerator')->once()->andReturn($generator);
 
         $linkedIn->getLoginUrl(['redirect_uri' => $otherUrl]);
     }

@@ -41,6 +41,6 @@ class IlluminateSessionStorage extends BaseDataStorage
         $this->validateKey($key);
         $name = $this->getStorageKeyId($key);
 
-        return Session::forget($name);
+        Session::forget($name);
     }
 }

@@ -64,7 +64,7 @@ class ResponseConverter
     {
         $body = $response->getBody();
         try {
-            return new \SimpleXMLElement((string) $body ?: '<root />');
+            return @new \SimpleXMLElement((string) $body ?: '<root />');
         } catch (\Exception $e) {
             throw new LinkedInTransferException('Unable to parse response body into XML.');
         }

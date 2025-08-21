@@ -1,15 +1,19 @@
 <?php
 
-namespace Elnino\LinkedIn\Storage;
+namespace Elnino\LinkedIn\Tests\Storage;
 
-use Mockery as m;
+use Elnino\LinkedIn\Storage\SessionStorage;
+use Mockery;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Class SessionStorageTest.
  *
  * @author Tobias Nyholm
  */
-class SessionStorageTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(SessionStorage::class)]
+class SessionStorageTest extends MockeryTestCase
 {
     /**
      * @var \Elnino\LinkedIn\Storage\SessionStorage storage
@@ -18,7 +22,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
 
     protected $prefix = 'linkedIn_';
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->storage = new SessionStorage();
     }
@@ -26,41 +30,37 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     public function testSet()
     {
         $this->storage->set('code', 'foobar');
-        $this->assertEquals($_SESSION[$this->prefix.'code'], 'foobar');
+        $this->assertEquals($_SESSION[$this->prefix . 'code'], 'foobar');
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\InvalidArgumentException
-     */
     public function testSetFail()
     {
+        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
         $this->storage->set('foobar', 'baz');
     }
 
     public function testGet()
     {
-        unset($_SESSION[$this->prefix.'state']);
+        unset($_SESSION[$this->prefix . 'state']);
         $result = $this->storage->get('state');
         $this->assertNull($result);
 
         $expected = 'foobar';
-        $_SESSION[$this->prefix.'code'] = $expected;
+        $_SESSION[$this->prefix . 'code'] = $expected;
         $result = $this->storage->get('code');
         $this->assertEquals($expected, $result);
     }
 
     public function testClear()
     {
-        $_SESSION[$this->prefix.'code'] = 'foobar';
+        $_SESSION[$this->prefix . 'code'] = 'foobar';
         $this->storage->clear('code');
-        $this->assertFalse(isset($_SESSION[$this->prefix.'code']));
+        $this->assertFalse(isset($_SESSION[$this->prefix . 'code']));
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\InvalidArgumentException
-     */
     public function testClearFail()
     {
+        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
         $this->storage->clear('foobar');
     }
 
@@ -68,9 +68,9 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     {
         $validKeys = SessionStorage::$validKeys;
 
-        $storage = m::mock('Elnino\LinkedIn\Storage\SessionStorage[clear]')
+        $storage = Mockery::mock('Elnino\LinkedIn\Storage\SessionStorage[clear]')
             ->shouldReceive('clear')->times(count($validKeys))
-            ->with(m::on(function ($arg) use ($validKeys) {
+            ->with(Mockery::on(function ($arg) use ($validKeys) {
                 return in_array($arg, $validKeys);
             }))
             ->getMock();

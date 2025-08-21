@@ -1,11 +1,16 @@
 <?php
 
-namespace Elnino\LinkedIn;
+namespace Elnino\LinkedIn\Tests;
+
+use Elnino\LinkedIn\AccessToken;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Tobias Nyholm
  */
-class AccessTokenTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(AccessToken::class)]
+class AccessTokenTest extends TestCase
 {
     public function testToString()
     {

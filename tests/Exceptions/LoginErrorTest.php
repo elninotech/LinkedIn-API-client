@@ -1,13 +1,18 @@
 <?php
 
-namespace Elnino\LinkedIn\Exception;
+namespace Elnino\LinkedIn\Tests\Exceptions;
+
+use Elnino\LinkedIn\Exception\LoginError;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class LoginErrorTest.
  *
  * @author Tobias Nyholm
  */
-class LoginErrorTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(LoginError::class)]
+class LoginErrorTest extends TestCase
 {
     public function testGetters()
     {

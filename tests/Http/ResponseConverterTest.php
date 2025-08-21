@@ -1,10 +1,14 @@
 <?php
 
-namespace Elnino\LinkedIn\Http;
+namespace Elnino\LinkedIn\Tests\Http;
 
+use Elnino\LinkedIn\Http\ResponseConverter;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
-class ResponseConverterTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(ResponseConverter::class)]
+class ResponseConverterTest extends TestCase
 {
     public function testConvert()
     {
@@ -35,22 +39,18 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\SimpleXMLElement', $result);
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\InvalidArgumentException
-     */
     public function testConvertJsonToSimpleXml()
     {
+        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
         $body = '{"foo":"bar"}';
         $response = new Response(200, [], $body);
 
         ResponseConverter::convert($response, 'json', 'simple_xml');
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\InvalidArgumentException
-     */
     public function testConvertXmlToArray()
     {
+        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
         $body = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <person>
   <firstname>foo</firstname>
@@ -62,11 +62,9 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
         ResponseConverter::convert($response, 'xml', 'array');
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\InvalidArgumentException
-     */
     public function testConvertJsonToFoobar()
     {
+        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
         $body = '{"foo":"bar"}';
         $response = new Response(200, [], $body);
 
@@ -89,17 +87,12 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $result->firstname);
     }
 
-    /**
-     * @expectedException \Elnino\LinkedIn\Exception\LinkedInTransferException
-     */
     public function testConvertToSimpleXmlError()
     {
+        $this->expectException(\Elnino\LinkedIn\Exception\LinkedInTransferException::class);
         $body = '{Foo: bar}';
 
         $response = new Response(200, [], $body);
-        $result = ResponseConverter::convertToSimpleXml($response);
-
-        $this->assertInstanceOf('\SimpleXMLElement', $result);
-        $this->assertEquals('foo', $result->firstname);
+        ResponseConverter::convertToSimpleXml($response);
     }
 }

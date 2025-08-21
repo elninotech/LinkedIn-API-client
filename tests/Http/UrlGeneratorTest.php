@@ -1,13 +1,19 @@
 <?php
 
-namespace Elnino\LinkedIn\Http;
+namespace Elnino\LinkedIn\Tests\Http;
+
+use Elnino\LinkedIn\Http\UrlGenerator;
+use Mockery;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class UrlGeneratorTest.
  *
  * @author Tobias Nyholm
  */
-class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
+#[CoversClass(UrlGenerator::class)]
+class UrlGeneratorTest extends TestCase
 {
     public function testDropLinkedInParams()
     {
@@ -88,12 +94,13 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCurrentURL()
     {
-        $gen = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator', ['getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'], []);
-        $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
-        $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com'));
-        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {
-            return empty($arg) ? '' : '?'.$arg;
-        }));
+        $gen = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $gen->shouldAllowMockingProtectedMethods();
+        $gen->shouldReceive('getHttpProtocol')->andReturn('http');
+        $gen->shouldReceive('getHttpHost')->andReturn('www.test.com');
+        $gen->shouldReceive('dropLinkedInParams')->andReturnUsing(function ($arg) {
+            return empty($arg) ? '' : '?' . $arg;
+        });
 
         // fake the HPHP $_SERVER globals
         $_SERVER['REQUEST_URI'] = '/unit-tests.php?one=one&two=two&three=three';
@@ -122,12 +129,13 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCurrentURLPort80()
     {
-        $gen = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator', ['getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'], []);
-        $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
-        $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com:80'));
-        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {
-            return empty($arg) ? '' : '?'.$arg;
-        }));
+        $gen = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $gen->shouldAllowMockingProtectedMethods();
+        $gen->shouldReceive('getHttpProtocol')->andReturn('http');
+        $gen->shouldReceive('getHttpHost')->andReturn('www.test.com:80');
+        $gen->shouldReceive('dropLinkedInParams')->andReturnUsing(function ($arg) {
+            return empty($arg) ? '' : '?' . $arg;
+        });
 
         //test port 80
         $_SERVER['REQUEST_URI'] = '/foobar.php';
@@ -140,12 +148,13 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCurrentURLPort8080()
     {
-        $gen = $this->getMock('Elnino\LinkedIn\Http\UrlGenerator', ['getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'], []);
-        $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
-        $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com:8080'));
-        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {
-            return empty($arg) ? '' : '?'.$arg;
-        }));
+        $gen = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $gen->shouldAllowMockingProtectedMethods();
+        $gen->shouldReceive('getHttpProtocol')->andReturn('http');
+        $gen->shouldReceive('getHttpHost')->andReturn('www.test.com:8080');
+        $gen->shouldReceive('dropLinkedInParams')->andReturnUsing(function ($arg) {
+            return empty($arg) ? '' : '?' . $arg;
+        });
 
         //test non default port 8080
         $_SERVER['REQUEST_URI'] = '/foobar.php';
@@ -162,21 +171,21 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $_SERVER['HTTP_HOST'] = $real;
         $_SERVER['HTTP_X_FORWARDED_HOST'] = 'evil.com';
         $gen = new DummyUrlGenerator();
-        $this->assertEquals($real, $gen->GetHttpHost());
+        $this->assertEquals($real, $gen->getHttpHost());
     }
 
     public function testHttpProtocolApache()
     {
         $_SERVER['HTTPS'] = 'on';
         $gen = new DummyUrlGenerator();
-        $this->assertEquals('https', $gen->GetHttpProtocol());
+        $this->assertEquals('https', $gen->getHttpProtocol());
     }
 
     public function testHttpProtocolNginx()
     {
         $_SERVER['SERVER_PORT'] = '443';
         $gen = new DummyUrlGenerator();
-        $this->assertEquals('https', $gen->GetHttpProtocol());
+        $this->assertEquals('https', $gen->getHttpProtocol());
     }
 
     public function testHttpHostForwarded()
@@ -186,7 +195,7 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $_SERVER['HTTP_X_FORWARDED_HOST'] = $real;
         $gen = new DummyUrlGenerator();
         $gen->setTrustForwarded(true);
-        $this->assertEquals($real, $gen->GetHttpHost());
+        $this->assertEquals($real, $gen->getHttpHost());
     }
 
     public function testHttpProtocolForwarded()
@@ -195,20 +204,20 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'http';
         $gen = new DummyUrlGenerator();
         $gen->setTrustForwarded(true);
-        $this->assertEquals('http', $gen->GetHttpProtocol());
+        $this->assertEquals('http', $gen->getHttpProtocol());
     }
 
     public function testHttpProtocolForwardedSecure()
     {
         $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
         $gen = new DummyUrlGenerator();
-        $this->assertEquals('http', $gen->GetHttpProtocol());
+        $this->assertEquals('http', $gen->getHttpProtocol());
 
         $gen->setTrustForwarded(true);
-        $this->assertEquals('https', $gen->GetHttpProtocol());
+        $this->assertEquals('https', $gen->getHttpProtocol());
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         unset($_SERVER['HTTPS']);
         unset($_SERVER['HTTP_X_FORWARDED_PROTO']);
