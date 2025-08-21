@@ -1,12 +1,19 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn;
 
-use Elnino\LinkedIn\Exception\LinkedInTransferException;
+use function array_merge;
+use function http_build_query;
+use function implode;
+use function is_array;
+use function is_string;
+use function md5;
+use function mt_rand;
+use function str_replace;
+use function uniqid;
 use Elnino\LinkedIn\Exception\LinkedInException;
+use Elnino\LinkedIn\Exception\LinkedInTransferException;
 use Elnino\LinkedIn\Http\GlobalVariableGetter;
 use Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface;
-use Elnino\LinkedIn\Http\RequestManager;
 use Elnino\LinkedIn\Http\RequestManagerInterface;
 use Elnino\LinkedIn\Http\ResponseConverter;
 use Elnino\LinkedIn\Storage\DataStorageInterface;
@@ -44,24 +51,23 @@ class Authenticator implements AuthenticatorInterface
     private $requestManager;
 
     /**
-     * @param RequestManagerInterface $requestManager
-     * @param string                  $appId
-     * @param string                  $appSecret
+     * @param string $appId
+     * @param string $appSecret
      */
     public function __construct(RequestManagerInterface $requestManager, $appId, $appSecret)
     {
-        $this->appId = $appId;
-        $this->appSecret = $appSecret;
+        $this->appId          = $appId;
+        $this->appSecret      = $appSecret;
         $this->requestManager = $requestManager;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function fetchNewAccessToken(LinkedInUrlGeneratorInterface $urlGenerator)
     {
         $storage = $this->getStorage();
-        $code = $this->getCode();
+        $code    = $this->getCode();
 
         if ($code === null) {
             /*
@@ -77,6 +83,7 @@ class Authenticator implements AuthenticatorInterface
         } catch (LinkedInException $e) {
             // code was bogus, so everything based on it should be invalidated.
             $storage->clearAll();
+
             throw $e;
         }
 
@@ -87,6 +94,61 @@ class Authenticator implements AuthenticatorInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = [])
+    {
+        // Generate a state
+        $this->establishCSRFTokenState();
+
+        // Build request params
+        $requestParams = array_merge([
+            'response_type' => 'code',
+            'client_id'     => $this->appId,
+            'state'         => $this->getStorage()->get('state'),
+            'redirect_uri'  => null,
+        ], $options);
+
+        // Save the redirect url for later
+        $this->getStorage()->set('redirect_uri', $requestParams['redirect_uri']);
+
+        // if 'scope' is passed as an array, convert to space separated list
+        $scopeParams = $options['scope'] ?? null;
+
+        if ($scopeParams) {
+            // if scope is an array
+            if (is_array($scopeParams)) {
+                $requestParams['scope'] = implode(' ', $scopeParams);
+            } elseif (is_string($scopeParams)) {
+                // if scope is a string with ',' => make it to an array
+                $requestParams['scope'] = str_replace(',', ' ', $scopeParams);
+            }
+        }
+
+        return $urlGenerator->getUrl('www', 'oauth/v2/authorization', $requestParams);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function clearStorage()
+    {
+        $this->getStorage()->clearAll();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setStorage(DataStorageInterface $storage)
+    {
+        $this->storage = $storage;
+
+        return $this;
+    }
+
+    /**
      * Retrieves an access token for the given authorization code
      * (previously generated from www.linkedin.com on behalf of
      * a specific user). The authorization code is sent to www.linkedin.com
@@ -94,12 +156,11 @@ class Authenticator implements AuthenticatorInterface
      * and the user for which it was generated all match, and the user is
      * either logged in to LinkedIn or has granted an offline access permission.
      *
-     * @param LinkedInUrlGeneratorInterface $urlGenerator
-     * @param string                        $code         An authorization code.
-     *
-     * @return AccessToken An access token exchanged for the authorization code.
+     * @param string $code an authorization code
      *
      * @throws LinkedInException
+     *
+     * @return AccessToken an access token exchanged for the authorization code
      */
     protected function getAccessTokenFromCode(LinkedInUrlGeneratorInterface $urlGenerator, $code)
     {
@@ -108,17 +169,18 @@ class Authenticator implements AuthenticatorInterface
         }
 
         $redirectUri = $this->getStorage()->get('redirect_uri');
+
         try {
-            $url = $urlGenerator->getUrl('www', 'oauth/v2/accessToken');
+            $url     = $urlGenerator->getUrl('www', 'oauth/v2/accessToken');
             $headers = ['Content-Type' => 'application/x-www-form-urlencoded'];
-            $body = http_build_query(
+            $body    = http_build_query(
                 [
-                    'grant_type' => 'authorization_code',
-                    'code' => $code,
-                    'redirect_uri' => $redirectUri,
-                    'client_id' => $this->appId,
+                    'grant_type'    => 'authorization_code',
+                    'code'          => $code,
+                    'redirect_uri'  => $redirectUri,
+                    'client_id'     => $this->appId,
                     'client_secret' => $this->appSecret,
-                ]
+                ],
             );
 
             $response = ResponseConverter::convertToArray($this->getRequestManager()->sendRequest('POST', $url, $headers, $body));
@@ -133,7 +195,7 @@ class Authenticator implements AuthenticatorInterface
         }
 
         $tokenData = array_merge(['access_token' => null, 'expires_in' => null], $response);
-        $token = new AccessToken($tokenData['access_token'], $tokenData['expires_in']);
+        $token     = new AccessToken($tokenData['access_token'], $tokenData['expires_in']);
 
         if (!$token->hasToken()) {
             throw new LinkedInException('Could not get access token: The response from LinkedIn.com did not contain a token.');
@@ -143,59 +205,25 @@ class Authenticator implements AuthenticatorInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = [])
-    {
-        // Generate a state
-        $this->establishCSRFTokenState();
-
-        // Build request params
-        $requestParams = array_merge([
-            'response_type' => 'code',
-            'client_id' => $this->appId,
-            'state' => $this->getStorage()->get('state'),
-            'redirect_uri' => null,
-        ], $options);
-
-        // Save the redirect url for later
-        $this->getStorage()->set('redirect_uri', $requestParams['redirect_uri']);
-
-        // if 'scope' is passed as an array, convert to space separated list
-        $scopeParams = isset($options['scope']) ? $options['scope'] : null;
-        if ($scopeParams) {
-            //if scope is an array
-            if (is_array($scopeParams)) {
-                $requestParams['scope'] = implode(' ', $scopeParams);
-            } elseif (is_string($scopeParams)) {
-                //if scope is a string with ',' => make it to an array
-                $requestParams['scope'] = str_replace(',', ' ', $scopeParams);
-            }
-        }
-
-        return $urlGenerator->getUrl('www', 'oauth/v2/authorization', $requestParams);
-    }
-
-    /**
      * Get the authorization code from the query parameters, if it exists,
      * and otherwise return null to signal no authorization code was
      * discovered.
      *
-     * @return string|null The authorization code, or null if the authorization code not exists.
-     *
      * @throws LinkedInException on invalid CSRF tokens
+     *
+     * @return null|string the authorization code, or null if the authorization code not exists
      */
     protected function getCode()
     {
         $storage = $this->getStorage();
 
         if (!GlobalVariableGetter::has('code')) {
-            return;
+            return null;
         }
 
         if ($storage->get('code') === GlobalVariableGetter::get('code')) {
-            //we have already validated this code
-            return;
+            // we have already validated this code
+            return null;
         }
 
         // if stored state does not exists
@@ -222,22 +250,13 @@ class Authenticator implements AuthenticatorInterface
     /**
      * Lays down a CSRF state token for this process.
      */
-    protected function establishCSRFTokenState()
+    protected function establishCSRFTokenState(): void
     {
         $storage = $this->getStorage();
+
         if ($storage->get('state') === null) {
-            $storage->set('state', md5(uniqid(mt_rand(), true)));
+            $storage->set('state', md5(uniqid((string) mt_rand(), true)));
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function clearStorage()
-    {
-        $this->getStorage()->clearAll();
-
-        return $this;
     }
 
     /**
@@ -246,24 +265,14 @@ class Authenticator implements AuthenticatorInterface
     protected function getStorage()
     {
         if ($this->storage === null) {
-            $this->storage = new SessionStorage();
+            $this->storage = new SessionStorage;
         }
 
         return $this->storage;
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function setStorage(DataStorageInterface $storage)
-    {
-        $this->storage = $storage;
-
-        return $this;
-    }
-
-    /**
-     * @return RequestManager
+     * @return RequestManagerInterface
      */
     protected function getRequestManager()
     {

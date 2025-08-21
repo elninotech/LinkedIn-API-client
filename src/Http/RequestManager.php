@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Http;
 
 use Elnino\LinkedIn\Exception\LinkedInTransferException;
@@ -17,17 +16,17 @@ use Http\Message\MessageFactory;
 class RequestManager implements RequestManagerInterface
 {
     /**
-     * @var \Http\Client\HttpClient
+     * @var HttpClient
      */
     private $httpClient;
 
     /**
-     * @var \Http\Message\MessageFactory
+     * @var MessageFactory
      */
     private $messageFactory;
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function sendRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
@@ -36,16 +35,26 @@ class RequestManager implements RequestManagerInterface
         try {
             return $this->getHttpClient()->sendRequest($request);
         } catch (TransferException $e) {
-            throw new LinkedInTransferException('Error while requesting data from LinkedIn.com: '.$e->getMessage(), $e->getCode(), $e);
+            throw new LinkedInTransferException('Error while requesting data from LinkedIn.com: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setHttpClient(HttpClient $httpClient)
     {
         $this->httpClient = $httpClient;
+
+        return $this;
+    }
+
+    /**
+     * @return RequestManager
+     */
+    public function setMessageFactory(MessageFactory $messageFactory)
+    {
+        $this->messageFactory = $messageFactory;
 
         return $this;
     }
@@ -63,19 +72,7 @@ class RequestManager implements RequestManagerInterface
     }
 
     /**
-     * @param MessageFactory $messageFactory
-     *
-     * @return RequestManager
-     */
-    public function setMessageFactory(MessageFactory $messageFactory)
-    {
-        $this->messageFactory = $messageFactory;
-
-        return $this;
-    }
-
-    /**
-     * @return \Http\Message\MessageFactory
+     * @return MessageFactory
      */
     private function getMessageFactory()
     {

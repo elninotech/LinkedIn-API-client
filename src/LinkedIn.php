@@ -1,7 +1,8 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn;
 
+use function json_encode;
+use function sprintf;
 use Elnino\LinkedIn\Exception\LoginError;
 use Elnino\LinkedIn\Http\GlobalVariableGetter;
 use Elnino\LinkedIn\Http\RequestManager;
@@ -38,7 +39,7 @@ class LinkedIn implements LinkedInInterface
      *
      * @var AccessToken
      */
-    protected $accessToken = null;
+    protected $accessToken;
 
     /**
      * @var string responseFormat
@@ -76,16 +77,17 @@ class LinkedIn implements LinkedInInterface
     {
         $this->responseDataType = $responseDataType;
 
-        $this->requestManager = new RequestManager();
-        $this->authenticator = new Authenticator($this->requestManager, $appId, $appSecret);
+        $this->requestManager = new RequestManager;
+        $this->authenticator  = new Authenticator($this->requestManager, $appId, $appSecret);
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function isAuthenticated()
     {
         $accessToken = $this->getAccessToken();
+
         if ($accessToken === null) {
             return false;
         }
@@ -96,7 +98,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function api($method, $resource, array $options = [])
     {
@@ -104,20 +106,20 @@ class LinkedIn implements LinkedInInterface
         $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
 
         // Do logic and adjustments to the options
-        $options = $this->filterRequestOption($options);
+        $options                            = $this->filterRequestOption($options);
         $options['headers']['Content-Type'] = 'application/json';
 
         // Generate an url
         $url = $this->getUrlGenerator()->getUrl(
             'api',
             $resource,
-            isset($options['query']) ? $options['query'] : []
+            $options['query'] ?? [],
         );
 
-        $body = isset($options['body']) ? $options['body'] : null;
+        $body               = $options['body'] ?? null;
         $this->lastResponse = $this->getRequestManager()->sendRequest($method, $url, $options['headers'], $body);
 
-        //Get the response data format
+        // Get the response data format
         if (isset($options['response_data_type'])) {
             $responseDataType = $options['response_data_type'];
         } else {
@@ -128,23 +130,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * Modify and filter the request options. Make sure we use the correct query parameters and headers.
-     *
-     * @param array $options
-     *
-     * @return array the formatted options
-     */
-    protected function filterRequestOption(array $options)
-    {
-        if (isset($options['json'])) {
-            $options['body'] = json_encode($options['json']);
-        }
-
-        return $options;
-    }
-
-    /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getLoginUrl($options = [])
     {
@@ -162,7 +148,6 @@ class LinkedIn implements LinkedInInterface
      * See docs for LinkedIn::api().
      *
      * @param string $resource
-     * @param array  $options
      *
      * @return mixed
      */
@@ -175,7 +160,6 @@ class LinkedIn implements LinkedInInterface
      * See docs for LinkedIn::api().
      *
      * @param string $resource
-     * @param array  $options
      *
      * @return mixed
      */
@@ -185,7 +169,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function clearStorage()
     {
@@ -195,7 +179,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function hasError()
     {
@@ -203,27 +187,19 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getError()
     {
         if ($this->hasError()) {
             return new LoginError(GlobalVariableGetter::get('error'), GlobalVariableGetter::get('error_description'));
         }
+
+        return null;
     }
 
     /**
-     * Get the default data type to be returned as a response.
-     *
-     * @return string
-     */
-    protected function getResponseDataType()
-    {
-        return $this->responseDataType;
-    }
-
-    /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setResponseDataType($responseDataType)
     {
@@ -233,7 +209,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getLastResponse()
     {
@@ -241,7 +217,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function getAccessToken()
     {
@@ -256,7 +232,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setAccessToken($accessToken)
     {
@@ -270,7 +246,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setUrlGenerator(UrlGeneratorInterface $urlGenerator)
     {
@@ -280,19 +256,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * @return UrlGeneratorInterface
-     */
-    protected function getUrlGenerator()
-    {
-        if ($this->urlGenerator === null) {
-            $this->urlGenerator = new UrlGenerator();
-        }
-
-        return $this->urlGenerator;
-    }
-
-    /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setStorage(DataStorageInterface $storage)
     {
@@ -302,7 +266,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setHttpClient(HttpClient $client)
     {
@@ -312,13 +276,51 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function setHttpMessageFactory(MessageFactory $factory)
     {
         $this->getRequestManager()->setMessageFactory($factory);
 
         return $this;
+    }
+
+    /**
+     * Modify and filter the request options. Make sure we use the correct query parameters and headers.
+     *
+     * @param mixed[] $options
+     *
+     * @return mixed[] the formatted options
+     */
+    protected function filterRequestOption(array $options)
+    {
+        if (isset($options['json'])) {
+            $options['body'] = json_encode($options['json']);
+        }
+
+        return $options;
+    }
+
+    /**
+     * Get the default data type to be returned as a response.
+     *
+     * @return string
+     */
+    protected function getResponseDataType()
+    {
+        return $this->responseDataType;
+    }
+
+    /**
+     * @return UrlGeneratorInterface
+     */
+    protected function getUrlGenerator()
+    {
+        if ($this->urlGenerator === null) {
+            $this->urlGenerator = new UrlGenerator;
+        }
+
+        return $this->urlGenerator;
     }
 
     /**

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn;
 
 use Elnino\LinkedIn\Exception\LoginError;
@@ -35,11 +34,11 @@ interface LinkedInInterface
      * - response_data_type: the data type to get back
      * - query: query parameters to the request
      *
-     * @param string $method   This is the HTTP verb
-     * @param string $resource everything after the domain in the URL.
-     * @param array  $options  See the readme for option description.
+     * @param string  $method   This is the HTTP verb
+     * @param string  $resource everything after the domain in the URL
+     * @param mixed[] $options  see the readme for option description
      *
-     * @return mixed this depends on the response_data_type parameter.
+     * @return mixed this depends on the response_data_type parameter
      */
     public function api($method, $resource, array $options = []);
 
@@ -50,7 +49,7 @@ interface LinkedInInterface
      * - redirect_uri: the url to go to after a successful login
      * - scope: comma (or space) separated list of requested extended permissions
      *
-     * @param array $options Provide custom parameters
+     * @param mixed[] $options Provide custom parameters
      *
      * @return string The URL for the login flow
      */
@@ -59,8 +58,8 @@ interface LinkedInInterface
     /**
      * See docs for LinkedIn::api().
      *
-     * @param string $resource
-     * @param array  $options
+     * @param string  $resource
+     * @param mixed[] $options
      *
      * @return mixed
      */
@@ -69,8 +68,8 @@ interface LinkedInInterface
     /**
      * See docs for LinkedIn::api().
      *
-     * @param string $resource
-     * @param array  $options
+     * @param string  $resource
+     * @param mixed[] $options
      *
      * @return mixed
      */
@@ -93,7 +92,7 @@ interface LinkedInInterface
     /**
      * Returns a LoginError or null.
      *
-     * @return LoginError|null
+     * @return null|LoginError
      */
     public function getError();
 
@@ -109,14 +108,14 @@ interface LinkedInInterface
     /**
      * Get the last response. This will always return a PSR-7 response no matter of the data type used.
      *
-     * @return ResponseInterface|null
+     * @return null|ResponseInterface
      */
     public function getLastResponse();
 
     /**
      * Returns an access token. If we do not have one in memory, try to fetch one from a *code* in the $_REQUEST.
      *
-     * @return AccessToken|null The access token of null if the access token is not found
+     * @return null|AccessToken The access token of null if the access token is not found
      */
     public function getAccessToken();
 
@@ -124,7 +123,7 @@ interface LinkedInInterface
      * If you have stored a previous access token in a storage (database) you could set it here. After setting an
      * access token you have to make sure to verify it is still valid by running LinkedIn::isAuthenticated.
      *
-     * @param string|AccessToken $accessToken
+     * @param AccessToken|string $accessToken
      *
      * @return $this
      */
@@ -133,16 +132,12 @@ interface LinkedInInterface
     /**
      * Set a URL generator.
      *
-     * @param UrlGeneratorInterface $urlGenerator
-     *
      * @return $this
      */
     public function setUrlGenerator(UrlGeneratorInterface $urlGenerator);
 
     /**
      * Set a data storage.
-     *
-     * @param DataStorageInterface $storage
      *
      * @return $this
      */
@@ -151,16 +146,12 @@ interface LinkedInInterface
     /**
      * Set a http client.
      *
-     * @param HttpClient $client
-     *
      * @return $this
      */
     public function setHttpClient(HttpClient $client);
 
     /**
      * Set a http message factory.
-     *
-     * @param MessageFactory $factory
      *
      * @return $this
      */

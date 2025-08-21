@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Tests\Exceptions;
 
 use Elnino\LinkedIn\Exception\LoginError;
@@ -14,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(LoginError::class)]
 class LoginErrorTest extends TestCase
 {
-    public function testGetters()
+    public function testGetters(): void
     {
         $error = new LoginError('foo', 'bar');
 

@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn;
 
 use Elnino\LinkedIn\Exception\LinkedInException;
@@ -16,19 +15,16 @@ interface AuthenticatorInterface
     /**
      * Tries to get a new access token from data storage or code. If it fails, it will return null.
      *
-     * @param LinkedInUrlGeneratorInterface $urlGenerator
-     *
-     * @return AccessToken|null A valid user access token, or null if one could not be fetched.
-     *
      * @throws LinkedInException
+     *
+     * @return null|AccessToken a valid user access token, or null if one could not be fetched
      */
     public function fetchNewAccessToken(LinkedInUrlGeneratorInterface $urlGenerator);
 
     /**
      * Generate a login url.
      *
-     * @param LinkedInUrlGeneratorInterface $urlGenerator
-     * @param array                         $options
+     * @param array<mixed> $options
      *
      * @return string
      */
@@ -42,8 +38,6 @@ interface AuthenticatorInterface
     public function clearStorage();
 
     /**
-     * @param DataStorageInterface $storage
-     *
      * @return $this
      */
     public function setStorage(DataStorageInterface $storage);

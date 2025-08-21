@@ -1,6 +1,9 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Storage;
+
+use const PHP_SAPI;
+use function session_id;
+use function session_start;
 
 /**
  * Store data in the global session.
@@ -11,8 +14,8 @@ class SessionStorage extends BaseDataStorage
 {
     public function __construct()
     {
-        //start the session if it not already been started
-        if (php_sapi_name() !== 'cli') {
+        // start the session if it not already been started
+        if (PHP_SAPI !== 'cli') {
             if (session_id() === '') {
                 session_start();
             }
@@ -20,35 +23,36 @@ class SessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function set($key, $value)
+    public function set($key, $value): void
     {
         $this->validateKey($key);
 
-        $name = $this->getStorageKeyId($key);
+        $name            = $this->getStorageKeyId($key);
         $_SESSION[$name] = $value;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function get($key)
     {
         $this->validateKey($key);
         $name = $this->getStorageKeyId($key);
 
-        return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
+        return $_SESSION[$name] ?? null;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function clear($key)
+    public function clear($key): void
     {
         $this->validateKey($key);
 
         $name = $this->getStorageKeyId($key);
+
         if (isset($_SESSION[$name])) {
             unset($_SESSION[$name]);
         }

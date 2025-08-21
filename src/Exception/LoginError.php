@@ -1,6 +1,7 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Exception;
+
+use function sprintf;
 
 /**
  * Class LoginError.
@@ -25,8 +26,16 @@ class LoginError
      */
     public function __construct($name, $description)
     {
-        $this->name = $name;
+        $this->name        = $name;
         $this->description = $description;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return sprintf('Name: %s, Description: %s', $this->getName(), $this->getDescription());
     }
 
     /**
@@ -43,13 +52,5 @@ class LoginError
     public function getDescription()
     {
         return $this->description;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return sprintf('Name: %s, Description: %s', $this->getName(), $this->getDescription());
     }
 }

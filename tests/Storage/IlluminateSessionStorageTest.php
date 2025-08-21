@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Tests\Storage;
 
 use Elnino\LinkedIn\Exception\InvalidArgumentException;
@@ -20,33 +19,32 @@ use PHPUnit\Framework\Attributes\UsesClass;
 class IlluminateSessionStorageTest extends MockeryTestCase
 {
     /**
-     * @var \Elnino\LinkedIn\Storage\IlluminateSessionStorage storage
+     * @var IlluminateSessionStorage storage
      */
     protected $storage;
-
     protected $prefix = 'linkedIn_';
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         Facade::clearResolvedInstances();
 
-        $this->storage = new IlluminateSessionStorage();
+        $this->storage = new IlluminateSessionStorage;
     }
 
-    public function testSet()
+    public function testSet(): void
     {
         Session::shouldReceive('put')->once()->with($this->prefix . 'code', 'foobar');
 
         $this->storage->set('code', 'foobar');
     }
 
-    public function testSetFail()
+    public function testSetFail(): void
     {
-        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->storage->set('foobar', 'baz');
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $expected = 'foobar';
         Session::shouldReceive('get')->once()->with($this->prefix . 'code')->andReturn($expected);
@@ -58,15 +56,15 @@ class IlluminateSessionStorageTest extends MockeryTestCase
         $this->assertNull($result);
     }
 
-    public function testClear()
+    public function testClear(): void
     {
         Session::shouldReceive('forget')->once()->with($this->prefix . 'code')->andReturn(true);
         $this->storage->clear('code');
     }
 
-    public function testClearFail()
+    public function testClearFail(): void
     {
-        $this->expectException(\Elnino\LinkedIn\Exception\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->storage->clear('foobar');
     }
 }

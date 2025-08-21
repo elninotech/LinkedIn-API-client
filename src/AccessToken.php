@@ -1,6 +1,8 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn;
+
+use function sprintf;
+use DateTime;
 
 /**
  * @author Tobias Nyholm
@@ -13,23 +15,23 @@ class AccessToken
     private $token;
 
     /**
-     * @var \DateTime expiresAt
+     * @var ?DateTime expiresAt
      */
     private $expiresAt;
 
     /**
-     * @param string        $token
-     * @param \DateTime|int $expiresIn
+     * @param string            $token
+     * @param null|DateTime|int $expiresIn
      */
     public function __construct($token = null, $expiresIn = null)
     {
         $this->token = $token;
 
         if ($expiresIn !== null) {
-            if ($expiresIn instanceof \DateTime) {
+            if ($expiresIn instanceof DateTime) {
                 $this->expiresAt = $expiresIn;
             } else {
-                $this->expiresAt = new \DateTime(sprintf('+%dseconds', $expiresIn));
+                $this->expiresAt = new DateTime(sprintf('+%dseconds', $expiresIn));
             }
         }
     }
@@ -53,11 +55,9 @@ class AccessToken
     }
 
     /**
-     * @param \DateTime $expiresAt
-     *
      * @return $this
      */
-    public function setExpiresAt(\DateTime $expiresAt = null)
+    public function setExpiresAt(?DateTime $expiresAt = null)
     {
         $this->expiresAt = $expiresAt;
 
@@ -65,7 +65,7 @@ class AccessToken
     }
 
     /**
-     * @return \DateTime
+     * @return null|DateTime
      */
     public function getExpiresAt()
     {

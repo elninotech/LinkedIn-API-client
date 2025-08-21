@@ -1,7 +1,8 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Storage;
 
+use function implode;
+use function in_array;
 use Elnino\LinkedIn\Exception\InvalidArgumentException;
 
 /**
@@ -9,12 +10,13 @@ use Elnino\LinkedIn\Exception\InvalidArgumentException;
  */
 abstract class BaseDataStorage implements DataStorageInterface
 {
+    /** @var string[] */
     public static $validKeys = ['state', 'code', 'access_token', 'redirect_uri'];
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function clearAll()
+    public function clearAll(): void
     {
         foreach (self::$validKeys as $key) {
             $this->clear($key);
@@ -28,9 +30,9 @@ abstract class BaseDataStorage implements DataStorageInterface
      *
      * @throws InvalidArgumentException
      */
-    protected function validateKey($key)
+    protected function validateKey($key): void
     {
-        if (!in_array($key, self::$validKeys)) {
+        if (!in_array($key, self::$validKeys, true)) {
             throw new InvalidArgumentException('Unsupported key "%s" passed to LinkedIn data storage. Valid keys are: %s', $key, implode(', ', self::$validKeys));
         }
     }
@@ -38,12 +40,12 @@ abstract class BaseDataStorage implements DataStorageInterface
     /**
      * Generate an ID to use with the data storage.
      *
-     * @param $key
+     * @param string $key
      *
      * @return string
      */
     protected function getStorageKeyId($key)
     {
-        return 'linkedIn_'.$key;
+        return 'linkedIn_' . $key;
     }
 }

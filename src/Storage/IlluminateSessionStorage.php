@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Storage;
 
 use Illuminate\Support\Facades\Session;
@@ -12,18 +11,18 @@ use Illuminate\Support\Facades\Session;
 class IlluminateSessionStorage extends BaseDataStorage
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function set($key, $value)
+    public function set($key, $value): void
     {
         $this->validateKey($key);
         $name = $this->getStorageKeyId($key);
 
-        return Session::put($name, $value);
+        Session::put($name, $value);
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public function get($key)
     {
@@ -34,9 +33,9 @@ class IlluminateSessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function clear($key)
+    public function clear($key): void
     {
         $this->validateKey($key);
         $name = $this->getStorageKeyId($key);

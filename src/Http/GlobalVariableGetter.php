@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Http;
 
 /**
@@ -30,7 +29,7 @@ class GlobalVariableGetter
      *
      * @param string $name
      *
-     * @return mixed|null
+     * @return null|mixed
      */
     public static function get($name)
     {
@@ -42,6 +41,6 @@ class GlobalVariableGetter
             return $_GET[$name];
         }
 
-        return;
+        return null;
     }
 }

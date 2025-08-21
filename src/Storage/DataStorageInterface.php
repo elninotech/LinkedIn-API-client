@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Storage;
 
 /**
@@ -17,7 +16,7 @@ interface DataStorageInterface
      * @param string $key
      * @param mixed  $value
      */
-    public function set($key, $value);
+    public function set($key, $value): void;
 
     /**
      * Get the data for $key, persisted by BaseFacebook::setPersistentData().
@@ -33,10 +32,10 @@ interface DataStorageInterface
      *
      * @param string $key
      */
-    public function clear($key);
+    public function clear($key): void;
 
     /**
      * Clear all data from the persistent storage.
      */
-    public function clearAll();
+    public function clearAll(): void;
 }

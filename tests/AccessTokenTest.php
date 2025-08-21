@@ -1,7 +1,7 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Tests;
 
+use DateTime;
 use Elnino\LinkedIn\AccessToken;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -12,33 +12,33 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AccessToken::class)]
 class AccessTokenTest extends TestCase
 {
-    public function testToString()
+    public function testToString(): void
     {
-        $token = new AccessToken();
+        $token = new AccessToken;
         $this->assertEquals('', $token);
 
         $token->setToken('foobar');
         $this->assertEquals('foobar', $token);
     }
 
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $token = new AccessToken('foobar', 10);
         $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
         $this->assertEquals('foobar', $token->getToken());
 
-        $token = new AccessToken();
+        $token = new AccessToken;
         $this->assertNull($token->getExpiresAt());
         $this->assertEmpty($token->getToken());
 
-        $token = new AccessToken(null, new \DateTime('+2minutes'));
+        $token = new AccessToken(null, new DateTime('+2minutes'));
         $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
     }
 
-    public function testSetExpiresAt()
+    public function testSetExpiresAt(): void
     {
-        $token = new AccessToken();
-        $token->setExpiresAt(new \DateTime('+2minutes'));
+        $token = new AccessToken;
+        $token->setExpiresAt(new DateTime('+2minutes'));
         $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
     }
 }

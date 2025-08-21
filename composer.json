@@ -51,5 +51,11 @@
     "allow-plugins": {
       "php-http/discovery": true
     }
+  },
+  "scripts": {
+    "test": "./tools/phpunit",
+    "phpstan": "./tools/phpstan analyse --memory-limit=-1",
+    "lint": "./tools/php-cs-fixer check",
+    "lint-fix": "./tools/php-cs-fixer fix"
   }
 }

@@ -1,6 +1,8 @@
-<?php
-
+<?php declare(strict_types=1);
 namespace Elnino\LinkedIn\Exception;
+
+use function call_user_func_array;
+use function func_get_args;
 
 class InvalidArgumentException extends LinkedInException
 {
