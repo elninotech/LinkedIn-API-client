@@ -31,7 +31,7 @@ class LinkedInTest extends MockeryTestCase
         $response = new Response(200, [], json_encode($expected));
         $url = 'http://example.com/test';
 
-        $headers = ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json', 'x-li-format' => 'json'];
+        $headers = ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json'];
 
         $generator = Mockery::mock(UrlGenerator::class);
         $generator->shouldReceive('getUrl')->once()->with(
@@ -39,7 +39,6 @@ class LinkedInTest extends MockeryTestCase
             $this->equalTo($resource),
             $this->equalTo([
                 'url' => 'foo',
-                'format' => 'json',
             ])
         )
             ->andReturn($url);
@@ -151,20 +150,6 @@ class LinkedInTest extends MockeryTestCase
 
         $this->assertEquals('foo', $linkedIn->getError()->getName());
         $this->assertNull($linkedIn->getError()->getDescription());
-    }
-
-    public function testFormatAccessors()
-    {
-        $get = new \ReflectionMethod(LinkedIn::class, 'getFormat');
-        $get->setAccessible(true);
-        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
-
-        //test default
-        $this->assertEquals('json', $get->invoke($linkedIn));
-
-        $format = 'foo';
-        $linkedIn->setFormat($format);
-        $this->assertEquals($format, $get->invoke($linkedIn));
     }
 
     public function testLoginUrl()

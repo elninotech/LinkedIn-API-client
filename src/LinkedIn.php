@@ -41,11 +41,6 @@ class LinkedIn implements LinkedInInterface
     protected $accessToken = null;
 
     /**
-     * @var string format
-     */
-    private $format;
-
-    /**
      * @var string responseFormat
      */
     private $responseDataType;
@@ -75,12 +70,10 @@ class LinkedIn implements LinkedInInterface
      *
      * @param string $appId
      * @param string $appSecret
-     * @param string $format           'json', 'xml'
-     * @param string $responseDataType 'array', 'string', 'simple_xml' 'psr7', 'stream'
+     * @param string $responseDataType 'array', 'string' 'psr7', 'stream'
      */
-    public function __construct($appId, $appSecret, $format = 'json', $responseDataType = 'array')
+    public function __construct($appId, $appSecret, $responseDataType = 'array')
     {
-        $this->format = $format;
         $this->responseDataType = $responseDataType;
 
         $this->requestManager = new RequestManager();
@@ -97,7 +90,7 @@ class LinkedIn implements LinkedInInterface
             return false;
         }
 
-        $user = $this->api('GET', '/v1/people/~:(id,firstName,lastName)', ['format' => 'json', 'response_data_type' => 'array']);
+        $user = $this->api('GET', '/v2/me/?projection=(id,firstName,lastName)', ['response_data_type' => 'array']);
 
         return !empty($user['id']);
     }
@@ -111,7 +104,8 @@ class LinkedIn implements LinkedInInterface
         $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
 
         // Do logic and adjustments to the options
-        $requestFormat = $this->filterRequestOption($options);
+        $options = $this->filterRequestOption($options);
+        $options['headers']['Content-Type'] = 'application/json';
 
         // Generate an url
         $url = $this->getUrlGenerator()->getUrl(
@@ -130,41 +124,23 @@ class LinkedIn implements LinkedInInterface
             $responseDataType = $this->getResponseDataType();
         }
 
-        return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
+        return ResponseConverter::convert($this->lastResponse, $responseDataType);
     }
 
     /**
      * Modify and filter the request options. Make sure we use the correct query parameters and headers.
      *
-     * @param array &$options
+     * @param array $options
      *
-     * @return string the request format to use
+     * @return array the formatted options
      */
-    protected function filterRequestOption(array &$options)
+    protected function filterRequestOption(array $options)
     {
         if (isset($options['json'])) {
-            $options['format'] = 'json';
             $options['body'] = json_encode($options['json']);
-        } elseif (!isset($options['format'])) {
-            // Make sure we always have a format
-            $options['format'] = $this->getFormat();
         }
 
-        // Set correct headers for this format
-        switch ($options['format']) {
-            case 'xml':
-                $options['headers']['Content-Type'] = 'text/xml';
-                break;
-            case 'json':
-                $options['headers']['Content-Type'] = 'application/json';
-                $options['headers']['x-li-format'] = 'json';
-                $options['query']['format'] = 'json';
-                break;
-            default:
-                // Do nothing
-        }
-
-        return $options['format'];
+        return $options;
     }
 
     /**
@@ -234,26 +210,6 @@ class LinkedIn implements LinkedInInterface
         if ($this->hasError()) {
             return new LoginError(GlobalVariableGetter::get('error'), GlobalVariableGetter::get('error_description'));
         }
-    }
-
-    /**
-     * Get the default format to use when sending requests.
-     *
-     * @return string
-     */
-    protected function getFormat()
-    {
-        return $this->format;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setFormat($format)
-    {
-        $this->format = $format;
-
-        return $this;
     }
 
     /**

@@ -31,7 +31,6 @@ interface LinkedInInterface
      *
      * The options:
      * - body: the body of the request
-     * - format: the format you are using to send the request
      * - headers: array with headers to use
      * - response_data_type: the data type to get back
      * - query: query parameters to the request
@@ -97,15 +96,6 @@ interface LinkedInInterface
      * @return LoginError|null
      */
     public function getError();
-
-    /**
-     * Set the default format to use when sending requests.
-     *
-     * @param string $format
-     *
-     * @return $this
-     */
-    public function setFormat($format);
 
     /**
      * Set the default data type to be returned as a response.
