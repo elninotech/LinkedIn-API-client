@@ -2,12 +2,15 @@
 
 namespace Elnino\LinkedIn\Tests\Http;
 
+use Elnino\LinkedIn\Exception\InvalidArgumentException;
 use Elnino\LinkedIn\Http\ResponseConverter;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(ResponseConverter::class)]
+#[UsesClass(InvalidArgumentException::class)]
 class ResponseConverterTest extends TestCase
 {
     public function testConvert()

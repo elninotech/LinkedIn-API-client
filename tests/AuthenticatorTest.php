@@ -2,10 +2,13 @@
 
 namespace Elnino\LinkedIn\Tests;
 
+use Elnino\LinkedIn\AccessToken;
 use Elnino\LinkedIn\Authenticator;
 use Elnino\LinkedIn\Exception\LinkedInException;
+use Elnino\LinkedIn\Http\GlobalVariableGetter;
 use Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface;
 use Elnino\LinkedIn\Http\RequestManager;
+use Elnino\LinkedIn\Http\ResponseConverter;
 use Elnino\LinkedIn\Http\UrlGenerator;
 use Elnino\LinkedIn\Storage\DataStorageInterface;
 use Elnino\LinkedIn\Storage\SessionStorage;
@@ -13,11 +16,16 @@ use GuzzleHttp\Psr7\Response;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 #[CoversClass(Authenticator::class)]
+#[UsesClass(AccessToken::class)]
+#[UsesClass(GlobalVariableGetter::class)]
+#[UsesClass(ResponseConverter::class)]
+#[UsesClass(SessionStorage::class)]
 class AuthenticatorTest extends MockeryTestCase
 {
     public const APP_ID = '123456789';

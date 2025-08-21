@@ -2,11 +2,13 @@
 
 namespace Elnino\LinkedIn\Tests\Storage;
 
+use Elnino\LinkedIn\Exception\InvalidArgumentException;
 use Elnino\LinkedIn\Storage\IlluminateSessionStorage;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Session;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 
 /**
  * Class SessionStorageTest.
@@ -14,6 +16,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
  * @author Andreas Creten
  */
 #[CoversClass(IlluminateSessionStorage::class)]
+#[UsesClass(InvalidArgumentException::class)]
 class IlluminateSessionStorageTest extends MockeryTestCase
 {
     /**

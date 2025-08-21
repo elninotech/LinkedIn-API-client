@@ -116,6 +116,9 @@ jobs:
   code-coverage:
     name: Code Coverage
 
+    needs:
+      - unit-tests
+
     if: github.event_name != 'schedule'
 
     runs-on: ubuntu-latest
