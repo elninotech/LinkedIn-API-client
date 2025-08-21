@@ -1,12 +1,9 @@
 # LinkedIn API client in PHP
 
-[![Latest Version](https://img.shields.io/github/release/Elninotech/Linkedin-API-client.svg?style=flat-square)](https://github.com/Elninotech/Linkedin-API-client/releases)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Build Status](https://img.shields.io/travis/Elninotech/Linkedin-API-client/master.svg?style=flat-square)](https://travis-ci.org/Elninotech/Linkedin-API-client)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b/mini.png)](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b)
-[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/Elninotech/Linkedin-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Elninotech/Linkedin-API-client)
-[![Quality Score](https://img.shields.io/scrutinizer/g/Elninotech/Linkedin-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Elninotech/Linkedin-API-client)
-[![Total Downloads](https://img.shields.io/packagist/dt/elninotech/linkedin-api-client.svg?style=flat-square)](https://packagist.org/packages/elninotech/linkedin-api-client)
+[![CI Status](https://github.com/elninotech/Linkedin-API-Client/workflows/CI/badge.svg)](https://github.com/elninotech/Linkedin-API-Client/actions)
+[![codecov](https://codecov.io/gh/elninotech/Linkedin-API-Client/branch/main/graph/badge.svg?token=0yzBUK8Wri)](https://codecov.io/gh/elninotech/Linkedin-API-Client)
+[![Latest Stable Version](https://poser.pugx.org/elninotech/linkedin-api-client/v)](https://packagist.org/packages/elninotech/linkedin-api-client)
+[![Total Downloads](https://poser.pugx.org/elninotech/linkedin-api-client/downloads)](https://packagist.org/packages/elninotech/linkedin-api-client/stats)
 
 
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
@@ -56,24 +53,24 @@ Now you may install the library by running the following:
 composer require elninotech/linkedin-api-client
 ```
 
-If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
+If you are updating from a previous version, make sure to read [the upgrade documentation](Upgrade.md).
 
 ### Finding the HTTP client (optional) 
 
-The LinkedIn client need to know what library you are using to send HTTP messages. You could provide an instance of 
-HttpClient and MessageFactory or you could fallback on auto discovery. Below is an example on where you provide a Guzzle6 
+The LinkedIn client needs to know what library you are using to send HTTP messages. You could provide an instance of 
+HttpClient and MessageFactory or you could fall back to auto discovery. Below is an example of where you provide a Guzzle7
 instance.
 
 ```php
 $linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
-$linkedIn->setHttpClient(new \Http\Adapter\Guzzle6\Client());
+$linkedIn->setHttpClient(new \Http\Adapter\Guzzle7\Client());
 $linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFactory());
 
 ```
 
 ## Usage
 
-In order to use this API client (or any other LinkedIn clients) you have to [register your application][register-app]
+In order to use this API client (or any other LinkedIn clients), you have to [register your application][register-app]
 with LinkedIn to receive an API key. Once you've registered your LinkedIn app, you will be provided with
 an *API Key* and *Secret Key*.
 
@@ -98,7 +95,7 @@ $linkedIn=new Elnino\LinkedIn\LinkedIn('client_id', 'client_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
-    $user=$linkedIn->get('v1/people/~:(firstName,lastName)');
+    $user=$linkedIn->get('/v2/me/?projection=(id,firstName,lastName)');
     echo "Welcome ".$user['firstName'];
 
     exit();
@@ -123,14 +120,14 @@ $linkedIn->setAccessToken('access_token_from_db');
 
 $options = array('json'=>
     array(
-        'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Elninotech/Linkedin-API-client',
+        'commentary' => 'Im testing the El Niño LinkedIn client! https://github.com/elninotech/Linkedin-API-client',
         'visibility' => array(
             'code' => 'anyone'
         )
     )
 );
 
-$result = $linkedIn->post('v1/people/~/shares', $options);
+$result = $linkedIn->post('rest/posts', $options);
 
 var_dump($result);
 
@@ -141,18 +138,6 @@ var_dump($result);
 
 ```
 
-You may of course do the same in xml. Use the following options array.
-```php
-$options = array(
-'format' => 'xml',
-'body' => '<share>
- <comment>Im testing Happyr LinkedIn client! https://github.com/Elninotech/Linkedin-API-client</comment>
- <visibility>
-   <code>anyone</code>
- </visibility>
-</share>');
-```
-
 ## Configuration
 
 ### The api options
@@ -161,58 +146,26 @@ The third parameter of `LinkedIn::api` is an array with options. Below is a tabl
 
 | Option name | Description
 | ----------- | -----------
-| body | The body of a HTTP request. Put your xml string here. 
-| format | Set this to 'json', 'xml' or 'simple_xml' to override the default value.
+| body | The body of a HTTP request. Put your json string here. 
 | headers | This is HTTP headers to the request
-| json | This is an array with json data that will be encoded to a json string. Using this option you do need to specify a format. 
+| json | This is an array with json data that will be encoded to a json string. 
 | response_data_type | To override the response format for one request 
 | query | This is an array with query parameters
 
-
-
-### Changing request format
-
-The default format when communicating with LinkedIn API is json. You can let the API do `json_encode` for you. 
-The following code shows you how. 
-
-```php
-$body = array(
-    'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Elninotech/Linkedin-API-client',
-    'visibility' => array('code' => 'anyone')
-);
-
-$linkedIn->post('v1/people/~/shares', array('json'=>$body));
-$linkedIn->post('v1/people/~/shares', array('body'=>json_encode($body)));
-```
-
-When using `array('json'=>$body)` as option the format will always be `json`. You can change the request format in three ways.
-
-```php
-// By constructor argument
-$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'xml');
-
-// By setter
-$linkedIn->setFormat('xml');
-
-// Set format for just one request
-$linkedIn->post('v1/people/~/shares', array('format'=>'xml', 'body'=>$body));
-```
-
-
 ### Understanding response data type
 
-The data type returned from `LinkedIn::api` can be configured. You may use the forth construtor argument, the
+The data type returned from `LinkedIn::api` can be configured. You may use the third constructor argument, the
 `LinkedIn::setResponseDataType` or as an option for `LinkedIn::api`
 
 ```php
 // By constructor argument
-$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'json', 'array');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'array');
 
 // By setter
 $linkedIn->setResponseDataType('simple_xml');
 
 // Set format for just one request
-$linkedIn->get('v1/people/~:(firstName,lastName)', array('response_data_type'=>'psr7'));
+$linkedIn->get('/v2/me/?projection=(id,firstName,lastName)', array('response_data_type'=>'psr7'));
 
 ```
 
@@ -221,7 +174,6 @@ Below is a table that specifies what the possible return data types are when you
 | Type | Description
 | ------ | ------------
 | array | An assosiative array. This can only be used with the `json` format.
-| simple_xml | A SimpleXMLElement. See [PHP manual](http://php.net/manual/en/class.simplexmlelement.php). This can only be used with the `xml` format.
 | psr7 | A PSR7 response.
 | stream | A file stream.
 | string | A plain old string.
@@ -229,7 +181,7 @@ Below is a table that specifies what the possible return data types are when you
 
 ### Use different Session classes
 
-You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
+You might want to use another storage than the default `SessionStorage`. If you are using Laravel
 you are more likely to inject the `IlluminateSessionStorage`.  
 ```php
 $linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
@@ -252,15 +204,7 @@ $url = $linkedIn->getLoginUrl(array('scope'=>$scope));
 echo "<a href='$url'>Login with LinkedIn</a>";
 ```
 
-## Framework integration
 
-If you want an easier integration with a framwork you may want to check out these repositories: 
-
-* [HappyrLinkedInBundle](https://github.com/Happyr/LinkedInBundle) for Symfony
-* [Laravel-Linkedin by mauri870](https://github.com/artesaos/laravel-linkedin) for Laravel 5
-
-
-[register-app]: https://www.linkedin.com/secure/developer
-[linkedin-code-samples]: https://developer.linkedin.com/documents/code-samples
-[api-doc-authentication]: https://developer.linkedin.com/documents/authentication
-[api-doc-core]: https://developer.linkedin.com/core-concepts
+[register-app]: https://www.linkedin.com/developers/apps
+[api-doc-authentication]: https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication
+[api-doc-core]: https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts
