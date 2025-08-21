@@ -17,8 +17,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(LinkedIn::class)]
 class LinkedInTest extends MockeryTestCase
 {
-    const APP_ID = '123456789';
-    const APP_SECRET = '987654321';
+    public const APP_ID = '123456789';
+    public const APP_SECRET = '987654321';
 
     public function testApi()
     {
@@ -33,14 +33,15 @@ class LinkedInTest extends MockeryTestCase
 
         $headers = ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json', 'x-li-format' => 'json'];
 
-        $generator = Mockery::mock(UrlGenerator::Class);
+        $generator = Mockery::mock(UrlGenerator::class);
         $generator->shouldReceive('getUrl')->once()->with(
             $this->equalTo('api'),
             $this->equalTo($resource),
             $this->equalTo([
                 'url' => 'foo',
                 'format' => 'json',
-            ]))
+            ])
+        )
             ->andReturn($url);
 
         $requestManager = Mockery::mock(RequestManager::class);
@@ -48,7 +49,8 @@ class LinkedInTest extends MockeryTestCase
             $this->equalTo($method),
             $this->equalTo($url),
             $this->equalTo($headers),
-            $this->equalTo(json_encode($postParams)))
+            $this->equalTo(json_encode($postParams))
+        )
             ->andReturn($response);
 
         $linkedIn = Mockery::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET])->makePartial();
@@ -104,9 +106,9 @@ class LinkedInTest extends MockeryTestCase
         $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
 
         // test default
-        $this->assertInstanceOf(UrlGenerator::Class, $get->invoke($linkedIn));
+        $this->assertInstanceOf(UrlGenerator::class, $get->invoke($linkedIn));
 
-        $object = Mockery::mock(UrlGenerator::Class);
+        $object = Mockery::mock(UrlGenerator::class);
         $linkedIn->setUrlGenerator($object);
         $this->assertEquals($object, $get->invoke($linkedIn));
     }
@@ -170,7 +172,7 @@ class LinkedInTest extends MockeryTestCase
         $currentUrl = 'currentUrl';
         $loginUrl = 'result';
 
-        $generator = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $generator = Mockery::mock(UrlGenerator::class)->makePartial();
         $generator->shouldReceive('getCurrentUrl')->once()->andReturn($currentUrl);
 
         $auth = Mockery::mock(Authenticator::class)->makePartial();
@@ -191,7 +193,7 @@ class LinkedInTest extends MockeryTestCase
         $loginUrl = 'result';
         $otherUrl = 'otherUrl';
 
-        $generator = Mockery::mock(UrlGenerator::Class);
+        $generator = Mockery::mock(UrlGenerator::class);
 
         $auth = Mockery::mock(Authenticator::class)->makePartial();
         $auth->shouldReceive('getLoginUrl')->once()

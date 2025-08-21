@@ -94,7 +94,7 @@ class UrlGeneratorTest extends TestCase
 
     public function testGetCurrentURL()
     {
-        $gen = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $gen = Mockery::mock(UrlGenerator::class)->makePartial();
         $gen->shouldAllowMockingProtectedMethods();
         $gen->shouldReceive('getHttpProtocol')->andReturn('http');
         $gen->shouldReceive('getHttpHost')->andReturn('www.test.com');
@@ -107,7 +107,8 @@ class UrlGeneratorTest extends TestCase
         $this->assertEquals(
             'http://www.test.com/unit-tests.php?one=one&two=two&three=three',
             $gen->getCurrentUrl(),
-            'getCurrentUrl function is changing the current URL');
+            'getCurrentUrl function is changing the current URL'
+        );
 
         // ensure structure of valueless GET params is retained (sometimes
         // an = sign was present, and sometimes it was not)
@@ -116,7 +117,8 @@ class UrlGeneratorTest extends TestCase
         $this->assertEquals(
             'http://www.test.com/unit-tests.php?one=&two=&three=',
             $gen->getCurrentUrl(),
-            'getCurrentUrl function is changing the current URL');
+            'getCurrentUrl function is changing the current URL'
+        );
 
         // now confirm that
         $_SERVER['REQUEST_URI'] = '/unit-tests.php?one&two&three';
@@ -129,7 +131,7 @@ class UrlGeneratorTest extends TestCase
 
     public function testGetCurrentURLPort80()
     {
-        $gen = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $gen = Mockery::mock(UrlGenerator::class)->makePartial();
         $gen->shouldAllowMockingProtectedMethods();
         $gen->shouldReceive('getHttpProtocol')->andReturn('http');
         $gen->shouldReceive('getHttpHost')->andReturn('www.test.com:80');
@@ -148,7 +150,7 @@ class UrlGeneratorTest extends TestCase
 
     public function testGetCurrentURLPort8080()
     {
-        $gen = Mockery::mock(UrlGenerator::Class)->makePartial();
+        $gen = Mockery::mock(UrlGenerator::class)->makePartial();
         $gen->shouldAllowMockingProtectedMethods();
         $gen->shouldReceive('getHttpProtocol')->andReturn('http');
         $gen->shouldReceive('getHttpHost')->andReturn('www.test.com:8080');
