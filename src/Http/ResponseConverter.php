@@ -1,9 +1,9 @@
 <?php
 
-namespace Happyr\LinkedIn\Http;
+namespace Elnino\LinkedIn\Http;
 
-use Happyr\LinkedIn\Exception\InvalidArgumentException;
-use Happyr\LinkedIn\Exception\LinkedInTransferException;
+use Elnino\LinkedIn\Exception\InvalidArgumentException;
+use Elnino\LinkedIn\Exception\LinkedInTransferException;
 use Psr\Http\Message\ResponseInterface;
 
 class ResponseConverter

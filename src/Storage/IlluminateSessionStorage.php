@@ -1,6 +1,6 @@
 <?php
 
-namespace Happyr\LinkedIn\Storage;
+namespace Elnino\LinkedIn\Storage;
 
 use Illuminate\Support\Facades\Session;
 

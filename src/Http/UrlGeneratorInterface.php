@@ -1,6 +1,6 @@
 <?php
 
-namespace Happyr\LinkedIn\Http;
+namespace Elnino\LinkedIn\Http;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>

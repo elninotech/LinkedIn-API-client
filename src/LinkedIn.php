@@ -1,14 +1,14 @@
 <?php
 
-namespace Happyr\LinkedIn;
+namespace Elnino\LinkedIn;
 
-use Happyr\LinkedIn\Exception\LoginError;
-use Happyr\LinkedIn\Http\GlobalVariableGetter;
-use Happyr\LinkedIn\Http\RequestManager;
-use Happyr\LinkedIn\Http\ResponseConverter;
-use Happyr\LinkedIn\Http\UrlGenerator;
-use Happyr\LinkedIn\Http\UrlGeneratorInterface;
-use Happyr\LinkedIn\Storage\DataStorageInterface;
+use Elnino\LinkedIn\Exception\LoginError;
+use Elnino\LinkedIn\Http\GlobalVariableGetter;
+use Elnino\LinkedIn\Http\RequestManager;
+use Elnino\LinkedIn\Http\ResponseConverter;
+use Elnino\LinkedIn\Http\UrlGenerator;
+use Elnino\LinkedIn\Http\UrlGeneratorInterface;
+use Elnino\LinkedIn\Storage\DataStorageInterface;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
 use Psr\Http\Message\ResponseInterface;

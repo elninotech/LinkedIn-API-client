@@ -1,6 +1,6 @@
 <?php
 
-namespace Happyr\LinkedIn\Storage;
+namespace Elnino\LinkedIn\Storage;
 
 /**
  * Store data in the global session.

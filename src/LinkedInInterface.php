@@ -1,10 +1,10 @@
 <?php
 
-namespace Happyr\LinkedIn;
+namespace Elnino\LinkedIn;
 
-use Happyr\LinkedIn\Exception\LoginError;
-use Happyr\LinkedIn\Http\UrlGeneratorInterface;
-use Happyr\LinkedIn\Storage\DataStorageInterface;
+use Elnino\LinkedIn\Exception\LoginError;
+use Elnino\LinkedIn\Http\UrlGeneratorInterface;
+use Elnino\LinkedIn\Storage\DataStorageInterface;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
 use Psr\Http\Message\ResponseInterface;

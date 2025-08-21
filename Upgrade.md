@@ -88,10 +88,10 @@ to make a minor adjustment to your code.
 
 ```php
 // Version 0.4
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 
 // Version 0.5
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 

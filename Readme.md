@@ -1,12 +1,12 @@
 # LinkedIn API client in PHP
 
-[![Latest Version](https://img.shields.io/github/release/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://github.com/Happyr/LinkedIn-API-client/releases)
+[![Latest Version](https://img.shields.io/github/release/Elninotech/Linkedin-API-client.svg?style=flat-square)](https://github.com/Elninotech/Linkedin-API-client/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Build Status](https://img.shields.io/travis/Happyr/LinkedIn-API-client/master.svg?style=flat-square)](https://travis-ci.org/Happyr/LinkedIn-API-client)
+[![Build Status](https://img.shields.io/travis/Elninotech/Linkedin-API-client/master.svg?style=flat-square)](https://travis-ci.org/Elninotech/Linkedin-API-client)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b/mini.png)](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b)
-[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Happyr/LinkedIn-API-client)
-[![Quality Score](https://img.shields.io/scrutinizer/g/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Happyr/LinkedIn-API-client)
-[![Total Downloads](https://img.shields.io/packagist/dt/happyr/linkedin-api-client.svg?style=flat-square)](https://packagist.org/packages/happyr/linkedin-api-client)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/Elninotech/Linkedin-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Elninotech/Linkedin-API-client)
+[![Quality Score](https://img.shields.io/scrutinizer/g/Elninotech/Linkedin-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Elninotech/Linkedin-API-client)
+[![Total Downloads](https://img.shields.io/packagist/dt/elninotech/linkedin-api-client.svg?style=flat-square)](https://packagist.org/packages/elninotech/linkedin-api-client)
 
 
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
@@ -30,7 +30,7 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 **TL;DR**
 ```bash
-composer require php-http/curl-client guzzlehttp/psr7 php-http/message happyr/linkedin-api-client
+composer require php-http/curl-client guzzlehttp/psr7 php-http/message elninotech/linkedin-api-client
 ```
 
 This library does not have a dependency on Guzzle or any other library that sends HTTP requests. We use the awesome 
@@ -53,7 +53,7 @@ composer require guzzlehttp/psr7 php-http/message
 Now you may install the library by running the following:
 
 ```bash
-composer require happyr/linkedin-api-client
+composer require elninotech/linkedin-api-client
 ```
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
@@ -65,7 +65,7 @@ HttpClient and MessageFactory or you could fallback on auto discovery. Below is 
 instance.
 
 ```php
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setHttpClient(new \Http\Adapter\Guzzle6\Client());
 $linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFactory());
 
@@ -94,7 +94,7 @@ This example below is showing how to login with LinkedIn.
  */
 //require_once "vendor/autoload.php";
 
-$linkedIn=new Happyr\LinkedIn\LinkedIn('client_id', 'client_secret');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('client_id', 'client_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
@@ -118,12 +118,12 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 The example below shows how you can post on a users wall. The access token is fetched from the database. 
 
 ```php
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setAccessToken('access_token_from_db');
 
 $options = array('json'=>
     array(
-        'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client',
+        'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Elninotech/Linkedin-API-client',
         'visibility' => array(
             'code' => 'anyone'
         )
@@ -146,7 +146,7 @@ You may of course do the same in xml. Use the following options array.
 $options = array(
 'format' => 'xml',
 'body' => '<share>
- <comment>Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client</comment>
+ <comment>Im testing Happyr LinkedIn client! https://github.com/Elninotech/Linkedin-API-client</comment>
  <visibility>
    <code>anyone</code>
  </visibility>
@@ -177,7 +177,7 @@ The following code shows you how.
 
 ```php
 $body = array(
-    'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client',
+    'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Elninotech/Linkedin-API-client',
     'visibility' => array('code' => 'anyone')
 );
 
@@ -189,7 +189,7 @@ When using `array('json'=>$body)` as option the format will always be `json`. Yo
 
 ```php
 // By constructor argument
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret', 'xml');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'xml');
 
 // By setter
 $linkedIn->setFormat('xml');
@@ -206,7 +206,7 @@ The data type returned from `LinkedIn::api` can be configured. You may use the f
 
 ```php
 // By constructor argument
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret', 'json', 'array');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'json', 'array');
 
 // By setter
 $linkedIn->setResponseDataType('simple_xml');
@@ -232,7 +232,7 @@ Below is a table that specifies what the possible return data types are when you
 You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
 you are more likely to inject the `IlluminateSessionStorage`.  
 ```php
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 

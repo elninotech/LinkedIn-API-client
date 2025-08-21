@@ -1,10 +1,10 @@
 <?php
 
-namespace Happyr\LinkedIn;
+namespace Elnino\LinkedIn;
 
-use Happyr\LinkedIn\Exception\LinkedInException;
-use Happyr\LinkedIn\Http\LinkedInUrlGeneratorInterface;
-use Happyr\LinkedIn\Storage\DataStorageInterface;
+use Elnino\LinkedIn\Exception\LinkedInException;
+use Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface;
+use Elnino\LinkedIn\Storage\DataStorageInterface;
 
 /**
  * This interface is responsible for the authentication process with LinkedIn.

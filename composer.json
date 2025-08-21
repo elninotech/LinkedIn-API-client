@@ -1,14 +1,17 @@
 {
-    "name": "happyr/linkedin-api-client",
+    "name": "elninotech/linkedin-api-client",
     "type": "library",
     "description": "LinkedIn API client. Handles OAuth, CSRF protection. Easy to implement and extend. This is a standalone library for any composer project.",
     "keywords": ["LinkedIn", "OAuth", "API", "Client", "SDK"],
-    "homepage": "http://developer.happyr.com/libraries/linkedin-php-client",
     "license": "MIT",
     "authors": [
         {
             "name": "Tobias Nyholm",
             "email": "tobias@happyr.com"
+        },
+        {
+          "name": "Victor Lap",
+          "email": "victor@elnino.tech"
         }
     ],
     "require": {
@@ -26,15 +29,10 @@
         "illuminate/support": "^5.0"
     },
     "autoload": {
-        "psr-4": { "Happyr\\LinkedIn\\": "src/" }
+        "psr-4": { "Elnino\\LinkedIn\\": "src/" }
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
         "test-ci": "vendor/bin/phpunit --coverage-text --coverage-clover=build/coverage.xml"
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.1.x-dev"
-        }
     }
 }

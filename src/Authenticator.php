@@ -1,16 +1,16 @@
 <?php
 
-namespace Happyr\LinkedIn;
+namespace Elnino\LinkedIn;
 
-use Happyr\LinkedIn\Exception\LinkedInTransferException;
-use Happyr\LinkedIn\Exception\LinkedInException;
-use Happyr\LinkedIn\Http\GlobalVariableGetter;
-use Happyr\LinkedIn\Http\LinkedInUrlGeneratorInterface;
-use Happyr\LinkedIn\Http\RequestManager;
-use Happyr\LinkedIn\Http\RequestManagerInterface;
-use Happyr\LinkedIn\Http\ResponseConverter;
-use Happyr\LinkedIn\Storage\DataStorageInterface;
-use Happyr\LinkedIn\Storage\SessionStorage;
+use Elnino\LinkedIn\Exception\LinkedInTransferException;
+use Elnino\LinkedIn\Exception\LinkedInException;
+use Elnino\LinkedIn\Http\GlobalVariableGetter;
+use Elnino\LinkedIn\Http\LinkedInUrlGeneratorInterface;
+use Elnino\LinkedIn\Http\RequestManager;
+use Elnino\LinkedIn\Http\RequestManagerInterface;
+use Elnino\LinkedIn\Http\ResponseConverter;
+use Elnino\LinkedIn\Storage\DataStorageInterface;
+use Elnino\LinkedIn\Storage\SessionStorage;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>

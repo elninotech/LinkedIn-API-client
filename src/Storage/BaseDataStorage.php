@@ -1,8 +1,8 @@
 <?php
 
-namespace Happyr\LinkedIn\Storage;
+namespace Elnino\LinkedIn\Storage;
 
-use Happyr\LinkedIn\Exception\InvalidArgumentException;
+use Elnino\LinkedIn\Exception\InvalidArgumentException;
 
 /**
  * @author Tobias Nyholm

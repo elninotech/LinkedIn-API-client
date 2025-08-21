@@ -1,8 +1,8 @@
 <?php
 
-namespace Happyr\LinkedIn\Http;
+namespace Elnino\LinkedIn\Http;
 
-use Happyr\LinkedIn\Exception\LinkedInTransferException;
+use Elnino\LinkedIn\Exception\LinkedInTransferException;
 use Http\Client\HttpClient;
 
 /**

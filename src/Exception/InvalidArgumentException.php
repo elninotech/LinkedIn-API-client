@@ -1,6 +1,6 @@
 <?php
 
-namespace Happyr\LinkedIn\Exception;
+namespace Elnino\LinkedIn\Exception;
 
 class InvalidArgumentException extends LinkedInException
 {
