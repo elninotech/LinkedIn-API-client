@@ -1,7 +1,7 @@
 # LinkedIn API client in PHP
 
 [![CI Status](https://github.com/elninotech/Linkedin-API-Client/workflows/CI/badge.svg)](https://github.com/elninotech/Linkedin-API-Client/actions)
-[![codecov](https://codecov.io/gh/elninotech/Linkedin-API-Client/branch/main/graph/badge.svg?token=0yzBUK8Wri)](https://codecov.io/gh/elninotech/Linkedin-API-Client)
+[![codecov](https://codecov.io/github/elninotech/LinkedIn-API-client/graph/badge.svg?token=MN6BEDGUY2)](https://codecov.io/github/elninotech/LinkedIn-API-client)
 [![Latest Stable Version](https://poser.pugx.org/elninotech/linkedin-api-client/v)](https://packagist.org/packages/elninotech/linkedin-api-client)
 [![Total Downloads](https://poser.pugx.org/elninotech/linkedin-api-client/downloads)](https://packagist.org/packages/elninotech/linkedin-api-client/stats)
 
@@ -37,7 +37,7 @@ find clients to use. For more information about virtual packages please refer to
 [HTTPlug](http://docs.php-http.org/en/latest/httplug/users.html). Example:
 
 ```bash
-composer require php-http/guzzle6-adapter
+composer require php-http/guzzle7-adapter
 ```
 
 You do also need to install a PSR-7 implementation and a factory to create PSR-7 messages (PSR-17 whenever that is 
@@ -78,7 +78,7 @@ an *API Key* and *Secret Key*.
 
 This example below is showing how to login with LinkedIn.
 
-```php 
+```php
 <?php
 
 /**
@@ -162,7 +162,7 @@ The data type returned from `LinkedIn::api` can be configured. You may use the t
 $linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'array');
 
 // By setter
-$linkedIn->setResponseDataType('simple_xml');
+$linkedIn->setResponseDataType('string');
 
 // Set format for just one request
 $linkedIn->get('/v2/me/?projection=(id,firstName,lastName)', array('response_data_type'=>'psr7'));
@@ -204,7 +204,11 @@ $url = $linkedIn->getLoginUrl(array('scope'=>$scope));
 echo "<a href='$url'>Login with LinkedIn</a>";
 ```
 
+### Special thanks
+
+This repo was originally created by [Thomas Nyholm from Happyr][forked-from].
 
 [register-app]: https://www.linkedin.com/developers/apps
 [api-doc-authentication]: https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication
 [api-doc-core]: https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts
+[forked-from]: https://github.com/Happyr/LinkedIn-API-client

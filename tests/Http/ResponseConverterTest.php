@@ -31,13 +31,6 @@ class ResponseConverterTest extends TestCase
 
         $result = ResponseConverter::convert($response, 'array');
         $this->assertTrue(is_array($result));
-
-        $body = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<person>
-  <firstname>foo</firstname>
-  <lastname>bar</lastname>
-</person>
-';
     }
 
     public function testConvertJsonToFoobar(): void
