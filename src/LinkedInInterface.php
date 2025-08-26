@@ -4,8 +4,6 @@ namespace Elnino\LinkedIn;
 use Elnino\LinkedIn\Exception\LoginError;
 use Elnino\LinkedIn\Http\UrlGeneratorInterface;
 use Elnino\LinkedIn\Storage\DataStorageInterface;
-use Http\Client\HttpClient;
-use Http\Message\MessageFactory;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -142,18 +140,4 @@ interface LinkedInInterface
      * @return $this
      */
     public function setStorage(DataStorageInterface $storage);
-
-    /**
-     * Set a http client.
-     *
-     * @return $this
-     */
-    public function setHttpClient(HttpClient $client);
-
-    /**
-     * Set a http message factory.
-     *
-     * @return $this
-     */
-    public function setHttpMessageFactory(MessageFactory $factory);
 }

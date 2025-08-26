@@ -2,7 +2,15 @@
 
 This document explains how you upgrade from one version to another. 
 
-## Upgrade from 1.0 to 2.0
+## Upcoming
+
+### Changes
+
+* Using PSR 17 Http Client and PSR 18 Factory  
+* Ability to inject RequestManager when creating a new client.
+* Deprecate specifying protocolVersion
+
+## Upgrade from 1.0 to 2.0.0
 
 ### Changes
 
@@ -18,7 +26,7 @@ This document explains how you upgrade from one version to another.
 
 ### Changes
 
-* We do not longer require `php-http/message`. You have to make sure to put that in your own composer.json.
+* We do no longer require `php-http/message`. You have to make sure to put that in your own composer.json.
 
 ## Upgrade from 0.7.1 to 0.7.2
 

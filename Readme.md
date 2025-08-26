@@ -5,10 +5,9 @@
 [![Latest Stable Version](https://poser.pugx.org/elninotech/linkedin-api-client/v)](https://packagist.org/packages/elninotech/linkedin-api-client)
 [![Total Downloads](https://poser.pugx.org/elninotech/linkedin-api-client/downloads)](https://packagist.org/packages/elninotech/linkedin-api-client/stats)
 
-
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
 token and when authenticated it helps you to send API requests. You will not get *everything* for free though... You
-have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. 
+have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API.
 
 To get an overview what this library actually is doing for you. Take a look at the authentication page from
 the [API docs][api-doc-authentication].
@@ -19,54 +18,26 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 * Flexible and easy to extend
 * Developed with modern PHP standards
-* Not developed for a specific framework. 
+* Not developed for a specific framework.
 * Handles the authentication process
 * Respects the CSRF protection
 
 ## Installation
 
-**TL;DR**
-```bash
-composer require php-http/curl-client guzzlehttp/psr7 php-http/message elninotech/linkedin-api-client
-```
-
-This library does not have a dependency on Guzzle or any other library that sends HTTP requests. We use the awesome 
-HTTPlug to achieve the decoupling. We want you to choose what library to use for sending HTTP requests. Consult this list 
-of packages that support [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
-find clients to use. For more information about virtual packages please refer to 
-[HTTPlug](http://docs.php-http.org/en/latest/httplug/users.html). Example:
-
-```bash
-composer require php-http/guzzle7-adapter
-```
-
-You do also need to install a PSR-7 implementation and a factory to create PSR-7 messages (PSR-17 whenever that is 
-released). You could use Guzzles PSR-7 implementation and factories from php-http:
-
-```bash
-composer require guzzlehttp/psr7 php-http/message 
-```
-
-Now you may install the library by running the following:
+First, install Linkedin-API-client via the [Composer][composer] package manager:
 
 ```bash
 composer require elninotech/linkedin-api-client
 ```
 
-If you are updating from a previous version, make sure to read [the upgrade documentation](Upgrade.md).
+Ensure that the `php-http/discovery` composer plugin is allowed to run or install a client manually if your project does
+not already have a PSR-18 client integrated.
 
-### Finding the HTTP client (optional) 
-
-The LinkedIn client needs to know what library you are using to send HTTP messages. You could provide an instance of 
-HttpClient and MessageFactory or you could fall back to auto discovery. Below is an example of where you provide a Guzzle7
-instance.
-
-```php
-$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
-$linkedIn->setHttpClient(new \Http\Adapter\Guzzle7\Client());
-$linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFactory());
-
+```bash
+composer require guzzlehttp/guzzle
 ```
+
+If you are updating from a previous version, make sure to read [the upgrade documentation](Upgrade.md).
 
 ## Usage
 
@@ -91,7 +62,7 @@ This example below is showing how to login with LinkedIn.
  */
 //require_once "vendor/autoload.php";
 
-$linkedIn=new Elnino\LinkedIn\LinkedIn('client_id', 'client_secret');
+$linkedIn = new Elnino\LinkedIn\LinkedIn('client_id', 'client_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
@@ -112,10 +83,10 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ### How to post on LinkedIn wall
 
-The example below shows how you can post on a users wall. The access token is fetched from the database. 
+The example below shows how you can post on a users wall. The access token is fetched from the database.
 
 ```php
-$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn = new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setAccessToken('access_token_from_db');
 
 $options = array('json'=>
@@ -142,15 +113,15 @@ var_dump($result);
 
 ### The api options
 
-The third parameter of `LinkedIn::api` is an array with options. Below is a table of array keys that you may use. 
+The third parameter of `LinkedIn::api` is an array with options. Below is a table of array keys that you may use.
 
-| Option name | Description
-| ----------- | -----------
-| body | The body of a HTTP request. Put your json string here. 
-| headers | This is HTTP headers to the request
-| json | This is an array with json data that will be encoded to a json string. 
-| response_data_type | To override the response format for one request 
-| query | This is an array with query parameters
+| Option name        | Description                                                            
+|--------------------|------------------------------------------------------------------------
+| body               | The body of a HTTP request. Put your json string here.                 
+| headers            | This is HTTP headers to the request                                    
+| json               | This is an array with json data that will be encoded to a json string. 
+| response_data_type | To override the response format for one request                        
+| query              | This is an array with query parameters                                 
 
 ### Understanding response data type
 
@@ -159,7 +130,7 @@ The data type returned from `LinkedIn::api` can be configured. You may use the t
 
 ```php
 // By constructor argument
-$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'array');
+$linkedIn = new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'array');
 
 // By setter
 $linkedIn->setResponseDataType('string');
@@ -171,20 +142,20 @@ $linkedIn->get('/v2/me/?projection=(id,firstName,lastName)', array('response_dat
 
 Below is a table that specifies what the possible return data types are when you call `LinkedIn::api`.
 
-| Type | Description
-| ------ | ------------
-| array | An assosiative array. This can only be used with the `json` format.
-| psr7 | A PSR7 response.
-| stream | A file stream.
-| string | A plain old string.
-
+| Type   | Description                                                         
+|--------|---------------------------------------------------------------------
+| array  | An assosiative array. This can only be used with the `json` format. 
+| psr7   | A PSR7 response.                                                    
+| stream | A file stream.                                                      
+| string | A plain old string.                                                 
 
 ### Use different Session classes
 
 You might want to use another storage than the default `SessionStorage`. If you are using Laravel
-you are more likely to inject the `IlluminateSessionStorage`.  
+you are more likely to inject the `IlluminateSessionStorage`.
+
 ```php
-$linkedIn=new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn = new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 
@@ -192,8 +163,8 @@ You can inject any class implementing `DataStorageInterface`. You can also injec
 
 ### Using different scopes
 
-If you want to define special scopes when you authenticate the user you should specify them when you are generating the 
-login url. If you don't specify scopes LinkedIn will use the default scopes that you have configured for the app.  
+If you want to define special scopes when you authenticate the user you should specify them when you are generating the
+login url. If you don't specify scopes LinkedIn will use the default scopes that you have configured for the app.
 
 ```php
 $scope = 'r_fullprofile,r_emailaddress,w_share';
@@ -204,11 +175,26 @@ $url = $linkedIn->getLoginUrl(array('scope'=>$scope));
 echo "<a href='$url'>Login with LinkedIn</a>";
 ```
 
+### Using a different http client
+
+If you want to customize how the requests are being sent, you can inject a different `RequestManager` when instantiating
+the API.
+
+```php
+$myRequestManager = new MySpecialRequestManager();
+$linkedIn = new Elnino\LinkedIn\LinkedIn('app_id', 'app_secret', 'array', $myRequestManager);
+```
+
 ### Special thanks
 
 This repo was originally created by [Thomas Nyholm from Happyr][forked-from].
 
+[composer]: https://getcomposer.org/
+
 [register-app]: https://www.linkedin.com/developers/apps
+
 [api-doc-authentication]: https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication
+
 [api-doc-core]: https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts
+
 [forked-from]: https://github.com/Happyr/LinkedIn-API-client
