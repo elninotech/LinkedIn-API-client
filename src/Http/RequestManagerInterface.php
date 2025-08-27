@@ -2,8 +2,9 @@
 namespace Elnino\LinkedIn\Http;
 
 use Elnino\LinkedIn\Exception\LinkedInTransferException;
-use Http\Client\HttpClient;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * A request manager builds a request.
@@ -15,20 +16,14 @@ interface RequestManagerInterface
     /**
      * Send a request.
      *
-     * @param string  $method
-     * @param string  $uri
-     * @param mixed[] $headers
-     * @param string  $body
-     * @param string  $protocolVersion
+     * @param string                      $method
+     * @param string|UriInterface         $uri
+     * @param mixed[]                     $headers
+     * @param null|StreamInterface|string $body
      *
      * @throws LinkedInTransferException
      *
      * @return ResponseInterface
      */
-    public function sendRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1');
-
-    /**
-     * @return RequestManager
-     */
-    public function setHttpClient(HttpClient $httpClient);
+    public function sendRequest($method, $uri, array $headers = [], $body = null);
 }

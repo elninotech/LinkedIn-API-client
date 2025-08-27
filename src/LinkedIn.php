@@ -6,12 +6,11 @@ use function sprintf;
 use Elnino\LinkedIn\Exception\LoginError;
 use Elnino\LinkedIn\Http\GlobalVariableGetter;
 use Elnino\LinkedIn\Http\RequestManager;
+use Elnino\LinkedIn\Http\RequestManagerInterface;
 use Elnino\LinkedIn\Http\ResponseConverter;
 use Elnino\LinkedIn\Http\UrlGenerator;
 use Elnino\LinkedIn\Http\UrlGeneratorInterface;
 use Elnino\LinkedIn\Storage\DataStorageInterface;
-use Http\Client\HttpClient;
-use Http\Message\MessageFactory;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -52,7 +51,7 @@ class LinkedIn implements LinkedInInterface
     private $lastResponse;
 
     /**
-     * @var RequestManager
+     * @var RequestManagerInterface
      */
     private $requestManager;
 
@@ -73,12 +72,11 @@ class LinkedIn implements LinkedInInterface
      * @param string $appSecret
      * @param string $responseDataType 'array', 'string' 'psr7', 'stream'
      */
-    public function __construct($appId, $appSecret, $responseDataType = 'array')
+    public function __construct($appId, $appSecret, $responseDataType = 'array', ?RequestManagerInterface $requestManager = null)
     {
         $this->responseDataType = $responseDataType;
-
-        $this->requestManager = new RequestManager;
-        $this->authenticator  = new Authenticator($this->requestManager, $appId, $appSecret);
+        $this->requestManager   = $requestManager ?? new RequestManager;
+        $this->authenticator    = new Authenticator($this->requestManager, $appId, $appSecret);
     }
 
     /**
@@ -103,7 +101,7 @@ class LinkedIn implements LinkedInInterface
     public function api($method, $resource, array $options = [])
     {
         // Add access token to the headers
-        $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
+        $options['headers']['Authorization'] = sprintf('Bearer %s', $this->getAccessToken());
 
         // Do logic and adjustments to the options
         $options                            = $this->filterRequestOption($options);
@@ -120,11 +118,7 @@ class LinkedIn implements LinkedInInterface
         $this->lastResponse = $this->getRequestManager()->sendRequest($method, $url, $options['headers'], $body);
 
         // Get the response data format
-        if (isset($options['response_data_type'])) {
-            $responseDataType = $options['response_data_type'];
-        } else {
-            $responseDataType = $this->getResponseDataType();
-        }
+        $responseDataType = $options['response_data_type'] ?? $this->getResponseDataType();
 
         return ResponseConverter::convert($this->lastResponse, $responseDataType);
     }
@@ -266,26 +260,6 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * @inheritDoc
-     */
-    public function setHttpClient(HttpClient $client)
-    {
-        $this->getRequestManager()->setHttpClient($client);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setHttpMessageFactory(MessageFactory $factory)
-    {
-        $this->getRequestManager()->setMessageFactory($factory);
-
-        return $this;
-    }
-
-    /**
      * Modify and filter the request options. Make sure we use the correct query parameters and headers.
      *
      * @param mixed[] $options
@@ -324,7 +298,7 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
-     * @return RequestManager
+     * @return RequestManagerInterface
      */
     protected function getRequestManager()
     {

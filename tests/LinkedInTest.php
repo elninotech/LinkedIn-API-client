@@ -25,6 +25,7 @@ use ReflectionMethod;
 #[UsesClass(Authenticator::class)]
 #[UsesClass(GlobalVariableGetter::class)]
 #[UsesClass(ResponseConverter::class)]
+#[UsesClass(RequestManager::class)]
 #[UsesClass(LoginError::class)]
 class LinkedInTest extends MockeryTestCase
 {

@@ -327,7 +327,6 @@ $config->setFinder($finder)
         'ternary_to_null_coalescing' => true,
         'trailing_comma_in_multiline' => [
             'elements' => [
-                'arguments',
                 'arrays',
                 'match',
             ]

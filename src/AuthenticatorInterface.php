@@ -24,7 +24,7 @@ interface AuthenticatorInterface
     /**
      * Generate a login url.
      *
-     * @param array<mixed> $options
+     * @param mixed[] $options
      *
      * @return string
      */
