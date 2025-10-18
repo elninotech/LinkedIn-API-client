@@ -50,6 +50,7 @@
   "scripts": {
     "lint": "./tools/php-cs-fixer check",
     "lint-fix": "./tools/php-cs-fixer fix",
+    "infection": "./tools/infection",
     "phpstan": "./tools/phpstan analyse --memory-limit=-1",
     "test": "./tools/phpunit",
     "test-coverage": "XDEBUG_MODE=coverage ./tools/phpunit --coverage-text"

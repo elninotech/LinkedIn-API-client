@@ -113,6 +113,9 @@ jobs:
       - name: Run tests with PHPUnit
         run: tools/phpunit --order-by depends,random
 
+      - name: Run tests with Infection
+        run: tools/infection --min-msi=84 --min-covered-msi=84
+
   code-coverage:
     name: Code Coverage
 
