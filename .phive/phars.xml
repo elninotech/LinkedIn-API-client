@@ -4,4 +4,5 @@
   <phar name="composer" version="^2.8.11" installed="2.8.11" location="./tools/composer" copy="true"/>
   <phar name="php-cs-fixer" version="^3.86.0" installed="3.86.0" location="./tools/php-cs-fixer" copy="true"/>
   <phar name="phpstan" version="^2.1.22" installed="2.1.22" location="./tools/phpstan" copy="true"/>
+  <phar name="infection" version="^0.31.7" installed="0.31.7" location="./tools/infection" copy="true"/>
 </phive>

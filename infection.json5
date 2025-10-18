@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/infection/infection/0.31.7/resources/schema.json",
+  "source": {
+    "directories": [
+      "src"
+    ]
+  },
+  "threads": "max",
+  "mutators": {
+    "@default": true
+  },
+  "phpUnit": {
+    customPath: "./tools/phpunit"
+  }
+}
